@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from svc.auth import api
 from svc.config import config
 
 
@@ -18,3 +19,6 @@ app = FastAPI(
 @app.get("/health", response_model=bool)
 def health():
     return True
+
+
+app.include_router(router=api.router, prefix="/auth")
