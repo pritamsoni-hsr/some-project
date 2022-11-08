@@ -1,0 +1,12 @@
+{
+  "python.formatting.blackArgs": [
+    "--line-length=119",
+    "--pyi",
+    "--color",
+    "--quiet"
+  ],
+  "python.linting.flake8Args": [
+    "--max-line-length=119",
+    "--ignore=E731"
+  ]
+}

@@ -1,0 +1,4 @@
+__pycache__
+
+# don't track generated schema
+openapi.json
