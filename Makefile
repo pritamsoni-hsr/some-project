@@ -10,3 +10,6 @@ generate:
 
 test:
 	py.test svc
+
+test-e2e:
+	py.test -c=pytest.e2e.ini svc

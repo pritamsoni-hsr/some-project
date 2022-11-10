@@ -4,6 +4,7 @@ from pydantic import BaseModel, BaseSettings
 
 
 class KeyPair(BaseModel):
+    id: str
     signing_key: str
     verification_key: str
 
@@ -22,6 +23,12 @@ config = AppConfig()
 
 
 with open("secrets/private.pem") as private, open("secrets/public.pem") as public:
-    config.KEYS = [KeyPair(signing_key=private.read(), verification_key=public.read())]
+    config.KEYS = [
+        KeyPair(
+            id="test",
+            signing_key=private.read().strip(),
+            verification_key=public.read().strip(),
+        )
+    ]
 
 assert len(config.KEYS) > 0, "should have atleast one key pair"

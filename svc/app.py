@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from tortoise.contrib.fastapi import register_tortoise
 
 from svc.auth import api
 from svc.config import config
@@ -22,3 +23,11 @@ def health():
 
 
 app.include_router(router=api.router, prefix="/auth")
+
+register_tortoise(
+    app=app,
+    db_url="sqlite://db.sqlite3",
+    modules={"models": ["svc.models"]},
+    add_exception_handlers=True,
+    generate_schemas=True,
+)

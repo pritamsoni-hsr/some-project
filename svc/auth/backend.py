@@ -1,13 +1,15 @@
-import datetime
 import logging
-from typing import Any, Dict, Optional, Tuple
+from datetime import datetime, timedelta
+from typing import Dict, Optional, Tuple
 from uuid import uuid4
 
 import jwt
 from fastapi import HTTPException, Request
+from google.auth.jwt import decode as google_decode
 
+from svc.auth.utils import datetime_to_epoch
 from svc.common import LazyUser
-from svc.config import config
+from svc.config import KeyPair, config
 
 logger = logging.getLogger(__name__)
 
@@ -23,50 +25,32 @@ class TokenError(Exception):
 class Token:
     token_type: str
     issuer = config.NAME
-    leeway = datetime.timedelta(minutes=5)
-    lifetime = datetime.timedelta(weeks=2)
+    leeway = timedelta(minutes=5)
+    lifetime = timedelta(weeks=2)
 
     def __init__(self, payload=dict()) -> None:
         self.payload = payload
-        self.current_time = datetime.datetime.utcnow()
+        self.current_time = datetime.utcnow()
 
     def set_iss(self):
-        """
-        set issuer
-        """
         self.payload["iss"] = self.issuer
 
     def set_jti(self):
-        """
-        jwt id
-        see also: https://tools.ietf.org/html/rfc7519#section-4.1.7
-        """
         self.payload["jti"] = uuid4().hex
 
-    def set_exp(self, claim="exp", from_time=None, lifetime=None):
-        """
-        expiration time
-        see also: https://tools.ietf.org/html/rfc7519#section-4.1.4
-        """
+    def set_exp(self, from_time: datetime | None = None):
         if from_time is None:
             from_time = self.current_time
 
-        if lifetime is None:
-            lifetime = self.lifetime
+        self.payload["exp"] = datetime_to_epoch(from_time + self.lifetime)
 
-        self.payload[claim] = (from_time + lifetime).timestamp()
-
-    def set_iat(self, claim="iat", at_time=None):
-        """
-        issued at time
-        see also: https://tools.ietf.org/html/rfc7519#section-4.1.6
-        """
+    def set_iat(self, at_time: datetime | None = None):
         if at_time is None:
             at_time = self.current_time
 
-        self.payload[claim] = (at_time).timestamp()
+        self.payload["iat"] = datetime_to_epoch(at_time)
 
-    def check_exp(self, claim="exp", current_time=None):
+    def check_exp(self, current_time: datetime | None = None):
         """
         Checks whether a timestamp value in the given claim has passed (since
         the given datetime value in `current_time`).  Raises a TokenError with
@@ -76,21 +60,22 @@ class Token:
             current_time = self.current_time
 
         try:
-            claim_value = self.payload[claim]
+            claim_value = self.payload["exp"]
         except KeyError:
-            raise TokenError(f"Token has no '{claim}' claim")
+            raise TokenError("Token has no exp claim")
 
-        claim_time = datetime.datetime.utcfromtimestamp(claim_value)
+        claim_time = datetime.utcfromtimestamp(claim_value)
 
         if claim_time <= current_time - self.leeway:
-            raise TokenError(f"Token '{claim}' claim has expired")
+            raise TokenError("Token exp claim has expired")
 
-    def token(self, key: str, alg: str) -> str:
+    def token(self, key: KeyPair, alg: str) -> str:
         self.set_iat()
         self.set_iss()
         self.set_exp()
         self.set_jti()
-        return jwt.encode(self.payload, key=key, algorithm=alg)
+        headers = dict(alg=alg, kid="test")
+        return jwt.encode(self.payload, key=key.signing_key, algorithm=alg, headers=headers)
 
 
 class AccessToken(Token):
@@ -99,17 +84,19 @@ class AccessToken(Token):
 
 class RefreshToken(Token):
     token_type: str = "refresh_token"
-    lifetime = datetime.timedelta(weeks=8)
+    lifetime = timedelta(weeks=8)
 
 
 class JWTBackend:
     alg = "RS256"  # just use asymmetric
     keys = config.KEYS
+    aud = config.NAME
 
     def get_user(self, token: str) -> Optional[LazyUser]:
         payload = self.decode(token=token, verify=True)
+        user_id = payload["user_id"]
         if payload:
-            return LazyUser(id="eff64e00a0124887821a1b4ae5ec624c")
+            return LazyUser(id=user_id)
         return None
 
     def get_payload(self, token: str) -> Tuple[Dict, bool]:
@@ -121,33 +108,20 @@ class JWTBackend:
         after authenticating the user's credentials.
         """
         # always sign with first key
-        key_pair = self.keys[0]
+        params = dict(key=self.keys[0], alg=self.alg)
 
-        access_token = AccessToken(dict(user_id=user.id, sub=user.id)).token(key=key_pair.signing_key, alg=self.alg)
-        refresh_token = RefreshToken(dict(user_id=user.id, sub=user.id)).token(key=key_pair.signing_key, alg=self.alg)
+        payload = dict(user_id=user.id, sub=user.id)
+        access_token = AccessToken(payload).token(**params)
+        refresh_token = RefreshToken(payload).token(**params)
 
-        return access_token, refresh_token.token
+        return access_token, refresh_token
 
-    def decode(self, token: str, verify: bool = True) -> Any:
-        for keypair in self.keys:
-            decoded = self.decode_single(token, key=keypair.verification_key, verify=verify)
-            if decoded:
-                return decoded
-        return None
-
-    def decode_single(self, token: str, key: str, verify: bool) -> Any | bool:
-        # TODO: improve error handling
-        try:
-            return jwt.decode(
-                token,
-                key=key,
-                verify=verify,
-                algorithms=[self.alg],
-                audience=self.aud,
-            )
-        except BaseException as e:
-            logger.error("failed to verify user token", e)
-        return False
+    def decode(self, token: str, verify: bool = True) -> Optional[LazyUser]:
+        keyMap = {}
+        for key in self.keys:
+            keyMap[key.id] = key.verification_key
+        payload = google_decode(token=token, certs=keyMap, verify=verify, audience=None)
+        return LazyUser(id=payload["user_id"])
 
 
 jwt_backend = JWTBackend()
