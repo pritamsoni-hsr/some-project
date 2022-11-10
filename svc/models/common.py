@@ -6,7 +6,7 @@ from tortoise import BaseDBAsyncClient, fields
 from tortoise.models import Model
 from ulid import ULID as ulid
 
-from .config import config
+from svc.config import config
 
 
 def get_ulid():
@@ -32,23 +32,3 @@ class BaseOrm(Model):
     async def delete(cls, using_db: Optional[BaseDBAsyncClient] = None):
         cls.deleted_at = datetime.now(tz=pytz.timezone(config.TIMEZONE))
         await cls.save()
-
-
-class User(BaseOrm):
-    username = fields.TextField(null=True)
-
-
-class UserOAuthConnections(BaseOrm):
-    user = fields.ForeignKeyField("models.User", related_name="oauth")
-    provider = fields.TextField()
-
-    @property
-    def provider_id(self) -> str:
-        return self.id
-
-    @provider_id.setter
-    def provider_id(self, value: str):
-        self.id = value
-
-    class Meta:
-        table = "user_oauth_connection"

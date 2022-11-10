@@ -27,8 +27,15 @@ async def init_db(db_url, create_db: bool = False, generate_schemas: bool = Fals
         await Tortoise.generate_schemas()
 
 
-@pytest.fixture(scope="package", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def initialize_tests():
     await init_db(db_url=DB_URL, create_db=True, generate_schemas=True)
     yield
     await Tortoise._drop_databases()
+
+
+@pytest.fixture(scope="function")
+async def user():
+    from svc.models.user import User
+
+    return await User.create()
