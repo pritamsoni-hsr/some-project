@@ -94,8 +94,8 @@ class JWTBackend:
 
     def get_user(self, token: str) -> Optional[LazyUser]:
         payload = self.decode(token=token, verify=True)
-        user_id = payload["user_id"]
         if payload:
+            user_id = payload.id
             return LazyUser(id=user_id)
         return None
 

@@ -7,6 +7,7 @@ from tortoise import transactions
 
 from svc import models
 from svc.common import BaseModel
+from svc.wallet_expense_categories import create_default_categories
 
 from .backend import jwt_backend
 from .oauth_backend import OAuthBackend, apple_backend, google_backend
@@ -118,4 +119,5 @@ async def create_user(provider_id: str, provider: str) -> models.User:
         id=provider_id,
         provider=provider,
     )
+    await create_default_categories(user_id=user.id)
     return user

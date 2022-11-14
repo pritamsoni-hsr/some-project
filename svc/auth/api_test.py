@@ -1,7 +1,8 @@
 from unittest.mock import MagicMock, patch
 from uuid import UUID
-from freezegun import freeze_time
+
 import pytest
+from freezegun import freeze_time
 from requests import Response
 
 from svc.config import config
@@ -22,7 +23,7 @@ async def test_exchange_token(
     mocked: MagicMock, oauth_google_backend: MagicMock, mocked_uuid: MagicMock, mocked_ulid: MagicMock
 ):
     oauth_google_backend.return_value = {"sub": "random", "email_verified": True}
-    mocked_ulid.return_value = "test_exchange_token"
+    mocked_ulid.side_effect = ["test_exchange_token", *[i for i in range(0, 100)]]
     response = Response()
     mocked_uuid.return_value = UUID("00000000-0000-0000-0000-000000000000")
     response.json = lambda: {"test": config.KEYS[0].verification_key}
@@ -54,14 +55,10 @@ class BackendWithKeys(oauth_backend.OAuthBackend):
 
 
 @pytest.mark.anyio
-@patch("ulid.ULID.from_timestamp")
-async def test_exchange_oauth_core(mocked: MagicMock):
+async def test_exchange_oauth_core():
     dummy_backend = BackendWithKeys()
-    mocked.return_value = "random"
     user = await api.exchange_oauth_token(access_token, backend=dummy_backend)
     assert user is not None
-    assert user.id == "random"
-    mocked.assert_called_once()
 
 
 class BackendWithKeys_not_verified(BackendWithKeys):

@@ -1,10 +1,16 @@
+from typing import Type
+
 from tortoise import fields
 
-from .common import BaseOrm
+from .common import AppOrmManager, BaseOrm
 
 
 class User(BaseOrm):
     username = fields.TextField(null=True)
+    oauth: Type["UserOAuthConnections"]
+
+    class Meta:
+        manager = AppOrmManager()
 
 
 class UserOAuthConnections(BaseOrm):
@@ -21,3 +27,4 @@ class UserOAuthConnections(BaseOrm):
 
     class Meta:
         table = "user_oauth_connection"
+        manager = AppOrmManager()

@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
 
 import pytz
-from tortoise import BaseDBAsyncClient, fields
+from tortoise import fields
+from tortoise.manager import Manager
 from tortoise.models import Model
 from ulid import ULID as ulid
 
@@ -12,6 +12,11 @@ from svc.config import config
 def get_ulid():
     uid = ulid.from_timestamp(datetime.now(tz=pytz.timezone(config.TIMEZONE)).timestamp())
     return str(uid).lower()
+
+
+class AppOrmManager(Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
 
 
 class BaseOrm(Model):
@@ -28,7 +33,6 @@ class BaseOrm(Model):
     def __str__(self) -> str:
         return self.__repr__()
 
-    @classmethod
-    async def delete(cls, using_db: Optional[BaseDBAsyncClient] = None):
-        cls.deleted_at = datetime.now(tz=pytz.timezone(config.TIMEZONE))
-        await cls.save()
+    async def delete(self):
+        self.deleted_at = datetime.now(tz=pytz.timezone(config.TIMEZONE))
+        await self.save()

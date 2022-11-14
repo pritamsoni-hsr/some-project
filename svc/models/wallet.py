@@ -1,7 +1,7 @@
 from tortoise import fields
 from tortoise.validators import MinLengthValidator
 
-from .common import BaseOrm
+from .common import AppOrmManager, BaseOrm
 
 
 class ExpenseCategory(BaseOrm):
@@ -10,6 +10,9 @@ class ExpenseCategory(BaseOrm):
     name = fields.TextField()
     categories = fields.TextField()
 
+    class Meta:
+        manager = AppOrmManager()
+
 
 class Wallet(BaseOrm):
     user = fields.ForeignKeyField(model_name="models.User")
@@ -17,6 +20,9 @@ class Wallet(BaseOrm):
     name = fields.TextField(validators=[MinLengthValidator(2)])
     currency = fields.CharField(max_length=3, validators=[MinLengthValidator(3)])
     category = fields.TextField()
+
+    class Meta:
+        manager = AppOrmManager()
 
 
 class Transaction(BaseOrm):
@@ -29,6 +35,7 @@ class Transaction(BaseOrm):
 
     class Meta:
         table = "tx"
+        manager = AppOrmManager()
 
     @property
     def is_debit(self):

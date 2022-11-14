@@ -4,6 +4,8 @@ import sys
 import pytest
 from tortoise import Tortoise
 
+from svc import models
+
 DB_URL = "sqlite://:memory:"
 
 
@@ -39,3 +41,17 @@ async def user():
     from svc.models.user import User
 
     return await User.create()
+
+
+@pytest.fixture(scope="function")
+async def wallet_user_pair(user: models.User):
+    return (
+        await models.Wallet.create(
+            icon="abc",
+            name="abc",
+            currency="INR",
+            category="income",
+            user_id=user.id,
+        ),
+        user,
+    )

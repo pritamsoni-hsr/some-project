@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from tortoise.contrib.fastapi import register_tortoise
 
+from svc import wallet
 from svc.auth import api
 from svc.config import config
 
@@ -23,6 +24,7 @@ def health():
 
 
 app.include_router(router=api.router, prefix="/auth")
+app.include_router(router=wallet.router, prefix="/wallets")
 
 register_tortoise(
     app=app,
