@@ -7,6 +7,7 @@ from requests import Response
 from tortoise.exceptions import IntegrityError
 
 from svc import models
+from svc.common import LazyUser, OAuthUser
 from svc.config import config
 
 from . import api, oauth_backend
@@ -24,7 +25,7 @@ refresh_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3QiLCJ0eXAiOiJKV1QifQ.eyJ1c2Vy
 async def test_exchange_token(
     mocked: MagicMock, oauth_google_backend: MagicMock, mocked_uuid: MagicMock, mocked_ulid: MagicMock
 ):
-    oauth_google_backend.return_value = {"sub": "random", "email_verified": True}
+    oauth_google_backend.return_value = OAuthUser(**{"sub": "random", "email_verified": True}, provider="")
     mocked_ulid.side_effect = ["test_exchange_token", *[i for i in range(0, 100)]]
     response = Response()
     mocked_uuid.return_value = UUID("00000000-0000-0000-0000-000000000000")
@@ -53,7 +54,7 @@ class BackendWithKeys(oauth_backend.OAuthBackend):
     keys = {"kid": "public_key"}
 
     def decode(self, token: str, verify: bool = True):
-        return {"sub": "user-id", "email_verified": True}
+        return OAuthUser(**{"sub": "user-id", "email_verified": True}, provider="")
 
 
 @pytest.mark.anyio
@@ -65,7 +66,7 @@ async def test_exchange_oauth_core():
 
 class BackendWithKeys_not_verified(BackendWithKeys):
     def decode(self, token: str, verify: bool = True):
-        return {"sub": "user-id", "email_verified": False}
+        return OAuthUser(**{"sub": "user-id", "email_verified": False}, provider="")
 
 
 @pytest.mark.anyio
@@ -85,3 +86,30 @@ async def test_create_user():
         await api.create_user(provider_id="user_provider_id", provider="shell")
 
     assert await models.User.filter().count() == 1, "should not create user when transaction fails"
+
+
+@freeze_time("2022-11-11")
+@patch("svc.auth.oauth_backend.google_backend.decode")
+@patch("requests.get")
+@pytest.mark.anyio
+async def test_add_provider(mocked: MagicMock, oauth_google_backend: MagicMock):
+    oauth_google_backend.return_value = OAuthUser(**{"sub": "random", "email_verified": True}, provider="google")
+
+    response = Response()
+    response.json = lambda: {"test": config.KEYS[0].verification_key}
+    mocked.return_value = response
+
+    user = await api.create_user(provider_id="user_provider_id", provider="shell")
+    token_pair = await api.add_provider(
+        api.ExchangeTokenRequest(token=access_token, provider="google"),
+        user=LazyUser(id=user.id),
+    )
+    assert isinstance(token_pair, api.TokenPairResponse)
+    assert await models.UserOAuthConnections.filter().count() == 2
+
+    token_pair = await api.add_provider(
+        api.ExchangeTokenRequest(token=access_token, provider="google"),
+        user=LazyUser(id=user.id),
+    )
+    assert isinstance(token_pair, api.TokenPairResponse)
+    assert await models.UserOAuthConnections.filter().count() == 2

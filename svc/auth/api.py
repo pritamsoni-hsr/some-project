@@ -1,12 +1,12 @@
 import logging
 from enum import Enum
 
-from fastapi import APIRouter
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, HTTPException
 from tortoise import transactions
 
 from svc import models
-from svc.common import BaseModel
+from svc.common import BaseModel, LazyUser
+from svc.utils import get_user
 from svc.wallet_expense_categories import create_default_categories
 
 from .backend import jwt_backend
@@ -41,14 +41,8 @@ async def exchange_token(req: ExchangeTokenRequest):
     """
     given credentials get token pair
     """
-    user = None
-    if req.provider == ExchangeTokenRequest.Providers.google:
-        user = await exchange_oauth_token(token=req.token, backend=google_backend)
-    elif req.provider == ExchangeTokenRequest.Providers.apple:
-        user = await exchange_oauth_token(token=req.token, backend=apple_backend)
-
-    if not user:
-        raise ValidationError(errors=[], model=ExchangeTokenRequest)
+    backend = get_oauth_backend(provider=req.provider)
+    user = await exchange_oauth_token(token=req.token, backend=backend)
 
     access, refresh = jwt_backend.for_user(user)
     return TokenPairResponse(access_token=access, refresh_token=refresh)
@@ -59,17 +53,39 @@ async def refresh_token(req: RefreshTokenRequest):
     """
     given refresh token, get new token pair
     """
-    try:
-        user = jwt_backend.decode(token=req.refresh_token)
-    except BaseException:
-        logger.exception("failed to get user from token")
-        user = None
-
-    if not user:
-        raise ValidationError(errors=[], model=ExchangeTokenRequest)
+    user = jwt_backend.decode(token=req.refresh_token)
 
     access, refresh = jwt_backend.for_user(user)
     return TokenPairResponse(access_token=access, refresh_token=refresh)
+
+
+@router.post("/add-provider", response_model=TokenPairResponse)
+async def add_provider(req: ExchangeTokenRequest, user: LazyUser = Depends(get_user)):
+    """
+    user can add multiple oauth provider to their account so they can login with any provider.
+    """
+    backend = get_oauth_backend(provider=req.provider)
+
+    oauth_user = backend.decode(token=req.token, verify=True)
+    logger.info("associating id_token")
+
+    oauth_conn, created = await models.UserOAuthConnections.get_or_create(
+        user_id=user.id,
+        id=oauth_user.provider_id,
+        provider=backend.name,
+    )
+
+    access, refresh = jwt_backend.for_user(user)
+    return TokenPairResponse(access_token=access, refresh_token=refresh)
+
+
+def get_oauth_backend(provider: ExchangeTokenRequest.Providers) -> OAuthBackend:
+    if provider == ExchangeTokenRequest.Providers.google:
+        return google_backend
+    elif provider == ExchangeTokenRequest.Providers.apple:
+        return apple_backend
+
+    raise HTTPException(status_code=400, detail="invalid provider")
 
 
 async def exchange_oauth_token(token: str, backend: OAuthBackend) -> models.User | None:
@@ -77,21 +93,12 @@ async def exchange_oauth_token(token: str, backend: OAuthBackend) -> models.User
     exchange oauth change to retrieve the user
     """
     # TODO: better error handling
-    try:
-        payload = backend.decode(token=token)
-    except BaseException:
-        logger.exception("failed to decode token")
-        return None
 
-    if not payload:
-        return None
+    oauth_user = backend.decode(token=token)
+    provider_id = oauth_user.provider_id
 
-    provider_id = payload.get("sub")
-    # apple return "bool" instead of bool
-    email_verified = payload.get("email_verified") in [True, "true"]
-
-    if not all([provider_id, email_verified]):
-        logger.warning(f"invalid provider_id or email is not verified, received {provider_id}, {email_verified}")
+    if not oauth_user.email_verified:
+        logger.warning(f"user is not verified, received {oauth_user}")
         return None
 
     # check if user exists
@@ -101,6 +108,7 @@ async def exchange_oauth_token(token: str, backend: OAuthBackend) -> models.User
     )
     if user:
         return user
+
     logger.info("creating new user from oauth id_token")
     # create user and oauth connection
     try:
