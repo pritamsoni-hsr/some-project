@@ -1,2 +1,7 @@
 - [x] Auth
   - [ ] associate multiple oauth providers for same user
+- [x] Multiple currencies wallets
+  - [x] wallets crud
+  - [x] transactions crud
+  - [x] tags autocomplete
+  - [x] spending categories
