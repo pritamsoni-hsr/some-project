@@ -5,6 +5,7 @@ from fastapi import Request, exceptions
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 
 from svc.auth.backend import jwt_backend
+from svc.config import config
 
 from .common import LazyUser
 
@@ -13,7 +14,8 @@ logger = getLogger(__name__)
 
 class UserTokenAuth(HTTPBearer):
     async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
-        return LazyUser(id="01ghw3ypv3bw97zev32bnwcwgz")
+        if config.TEST_USER_ID:
+            return LazyUser(id=config.TEST_USER_ID)
         response = await super().__call__(request)
         if not response:
             return response

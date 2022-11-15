@@ -18,10 +18,13 @@ class AppConfig(BaseSettings):
     KEYS: List[KeyPair] = []
     OAUTH_APPLE_AUD = "host.exp.Exponent"  # TODO: replace after ejecting from expo
     OAUTH_GOOGLE_AUD = "226205689391-7cvoq5ionp176vnmbsiphempn1rt0kp4.apps.googleusercontent.com"
+    TEST_USER_ID: str | None  # user id used for testing
 
 
 config = AppConfig()
 
+if config.DEBUG is False:
+    assert config.TEST_USER_ID is None
 
 with open("secrets/private.pem") as private, open("secrets/public.pem") as public:
     config.KEYS = [
