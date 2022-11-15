@@ -13,6 +13,7 @@ class AppConfig(BaseSettings):
     NAME = "some-service"
     DEBUG = False
     TIMEZONE = "UTC"
+    DATABASE_CONN = "sqlite://db.sqlite3"
     # use first keypair to sign, and rest are rotated keys which should only be used to verify
     KEYS: List[KeyPair] = []
     OAUTH_APPLE_AUD = "host.exp.Exponent"  # TODO: replace after ejecting from expo

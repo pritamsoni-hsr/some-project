@@ -1,11 +1,12 @@
-from fastapi.exceptions import HTTPException as BaseHTTPException
+from fastapi import status
+from fastapi.exceptions import HTTPException
 
 
-class UnauthorizedError(BaseHTTPException):
+class UnauthorizedError(HTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=401, detail="Not authorized", headers={})
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized", headers={})
 
 
-class UnauthenticatedError(BaseHTTPException):
+class UnauthenticatedError(HTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=403, detail="Not authenticated", headers={})
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail="Not authenticated", headers={})

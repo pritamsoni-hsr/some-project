@@ -12,7 +12,7 @@ class LazyUser:
 class BaseModel(_BaseModel):
     class Config:
         orm_mode = True
-        title = "body"
+        # title = "body"
         extra = "forbid"
 
 

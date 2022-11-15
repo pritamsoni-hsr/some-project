@@ -4,7 +4,9 @@ from uuid import UUID
 import pytest
 from freezegun import freeze_time
 from requests import Response
+from tortoise.exceptions import IntegrityError
 
+from svc import models
 from svc.config import config
 
 from . import api, oauth_backend
@@ -71,3 +73,15 @@ async def test_exchange_oauth_core_with_unauthenticated_user():
     dummy_backend = BackendWithKeys_not_verified()
     user = await api.exchange_oauth_token(access_token, backend=dummy_backend)
     assert user is None
+
+
+@pytest.mark.anyio
+async def test_create_user():
+    user = await api.create_user(provider_id="user_provider_id", provider="shell")
+    oauth_connections = await user.oauth.all()
+
+    assert oauth_connections[0].id == "user_provider_id"
+    with pytest.raises(IntegrityError):
+        await api.create_user(provider_id="user_provider_id", provider="shell")
+
+    assert await models.User.filter().count() == 1, "should not create user when transaction fails"

@@ -13,4 +13,5 @@ if __name__ == "__main__":
         app="svc.app:app",
         reload=config.DEBUG,
         host="127.0.0.1" if config.DEBUG else "0.0.0.0",
+        reload_includes=["svc"],
     )

@@ -26,7 +26,7 @@ def to_wallet(obj: models.Wallet) -> WalletResponse:
         icon=obj.icon,
         name=obj.name,
         currency=obj.currency,
-        category=obj.category,
+        category=obj.category or "income",
         created_at=obj.created_at,
     )
 
@@ -54,7 +54,7 @@ async def create_wallet(req: CreateWalletRequest, user: LazyUser = Depends(get_u
 @router.get("/{id}", response_model=WalletResponse)
 async def get_wallet(id: str, user: LazyUser = Depends(get_user)):
     obj = await models.Wallet.get(id=id)
-    print(models.Wallet._meta.manager.__class__)
+
     if obj.user_id != user.id:
         raise UnauthorizedError()
     return to_wallet(obj)

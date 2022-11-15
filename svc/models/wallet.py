@@ -32,6 +32,7 @@ class Transaction(BaseOrm):
     currency = fields.CharField(max_length=3, validators=[MinLengthValidator(3)])
     note = fields.TextField(null=True)
     created_at = fields.DatetimeField()
+    more = fields.JSONField(null=True)
 
     class Meta:
         table = "tx"
