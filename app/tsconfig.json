@@ -13,10 +13,10 @@
     "noEmit": true,
     "paths": {
       "@app/*": [
-        "src/*"
+        "./src/*"
       ],
-      "common": [
-        "src/common/*"
+      "common/*": [
+        "./src/common/*"
       ]
     },
     "resolveJsonModule": true,

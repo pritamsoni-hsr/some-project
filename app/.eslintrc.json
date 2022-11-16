@@ -1,0 +1,39 @@
+{
+  "extends": ["@react-native-community"],
+  "globals": {
+    "__API_URL__": "readonly",
+    "__COMMIT_ID__": "readonly",
+    "__ENVIRONMENT__": "readonly",
+    "Atomics": "readonly",
+    "HTMLElement": "readonly",
+    "NodeJS": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "overrides": [
+    {
+      "env": {
+        "jest": true
+      },
+      "files": ["*.e2e.js"]
+    }
+  ],
+  "root": true,
+  "rules": {
+    "curly": "off",
+    "jsx-quotes": ["warn", "prefer-single"],
+    "quote-props": "off",
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "max-len": [
+      "warn",
+      {
+        "code": 119,
+        "comments": 124
+      }
+    ],
+    "no-extend-native": ["warn", { "exceptions": ["Date"] }],
+    "prettier/prettier": "off",
+    "react-native/no-inline-styles": "off",
+    "react/no-unstable-nested-components": "off",
+    "react/react-in-jsx-scope": "off"
+  }
+}
