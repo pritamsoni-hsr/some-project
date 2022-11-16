@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "jsx": "react-native",
+    "lib": [
+      "DOM",
+      "ESNext"
+    ],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "paths": {
+      "@app/*": [
+        "src/*"
+      ],
+      "common": [
+        "src/common/*"
+      ]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ESNext"
+  },
+  "display": "Expo",
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
+  "extends": "expo/tsconfig.base"
+}
