@@ -1,0 +1,11 @@
+**.json
+assets
+build
+node_modules
+
+**/openapi/**
+coverage
+.expo
+
+packages/common/api/pb/pb.d.ts
+packages/web/src/api/pb.d.ts
