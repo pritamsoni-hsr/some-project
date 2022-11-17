@@ -2,7 +2,7 @@ import 'isomorphic-fetch';
 
 import { api } from './client';
 
-const newResponse = async ({ data, status }: { data?: object, status: number } = { data: undefined, status: 200 }) => {
+const newResponse = async ({ data, status }: { data?: object; status: number } = { data: undefined, status: 200 }) => {
   const response = new Response(JSON.stringify(data), { status: status, statusText: 'status-text' });
   response.clone = jest.fn().mockReturnValue(data);
   response.json = jest.fn().mockReturnValue(data);
@@ -73,4 +73,3 @@ describe('Client automatic token refreshing', () => {
     // expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });
-
