@@ -66,7 +66,7 @@ const FinanceApp = () => {
   );
 };
 
-const navigationRef = React.createRef<NavigationContainerRef<AppRouting>>();
+export const navigationRef = React.createRef<NavigationContainerRef<AppRouting>>();
 
 /** utility to navigate from anywhere in the app */
 export const navigate = (name: keyof AppRouting, params) => {
