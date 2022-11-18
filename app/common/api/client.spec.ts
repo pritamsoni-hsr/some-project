@@ -14,6 +14,7 @@ describe('Client', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(newResponse());
     await api.wallet.getWallets({ cursor: '90' });
 
+    expect(api.isLoggedIn()).toEqual(false);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining('?cursor=90'),
@@ -28,6 +29,7 @@ describe('Client', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(newResponse());
     await api.wallet.getWallets({ cursor: '90' });
 
+    expect(api.isLoggedIn()).toEqual(true);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining('?cursor=90'),
@@ -42,6 +44,7 @@ describe('Client', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(newResponse());
     await api.wallet.getWallets({ cursor: '90' });
 
+    expect(api.isLoggedIn()).toEqual(false);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining('?cursor=90'),

@@ -14,6 +14,10 @@ class APIClient {
     this.load();
   }
 
+  isLoggedIn() {
+    return Boolean(this.params.accessToken);
+  }
+
   login(token: string) {
     // this way the openapi spec should explicity contains info about authentication of endpoints
     this.params.accessToken = token;
