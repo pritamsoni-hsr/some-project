@@ -13,13 +13,13 @@ const errB = {
 };
 
 describe('Test Errors', () => {
-  it('should format error object correctly', () => {
+  it('should format error object correctly', async () => {
     const res = new Response();
     res.json = jest.fn().mockReturnValue(errA);
 
     const err = new ResponseError(res);
 
-    const errObject = getErrorMessage(err);
+    const errObject = await getErrorMessage(err);
     expect(errObject).toEqual(errA);
   });
 

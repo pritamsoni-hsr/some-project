@@ -1,6 +1,6 @@
 import { HTTPValidationError, ResponseError } from './openapi';
 
-export const getErrorMessage = (err?: ResponseError) => {
+export const getErrorMessage = async (err?: ResponseError) => {
   if (!err) {
     // some unknown error occurred, please report it to us
     return 'invalid_error';
@@ -8,7 +8,7 @@ export const getErrorMessage = (err?: ResponseError) => {
 
   // handle errors when json is returned
   if (err.response.json) {
-    return err.response.json() as HTTPValidationError;
+    return (await err.response.json()) as HTTPValidationError;
   }
 
   // render error in string format in all other cases
