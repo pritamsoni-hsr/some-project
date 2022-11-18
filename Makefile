@@ -3,6 +3,9 @@ lint:
 	yarn --cwd=app run prettier --config=../.prettierrc --ignore-path=../.prettierignore -w .
 	# yarn --cwd=app run eslint --config=.eslintrc.json --fix .
 
+gen-random-data:
+	python svc --action=generate-random-data
+
 develop:
 	DEBUG=True python svc
 
@@ -14,7 +17,7 @@ serve:
 
 # generate openapi schema
 generate:
-	python svc/openapi.py
+	python svc --action=generate-openapi-schema
 	rm -rf app/src/common/api/openapi
 	docker run --rm \
 		-v ${PWD}:/repo openapitools/openapi-generator-cli:v6.2.1 generate \

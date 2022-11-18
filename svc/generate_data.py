@@ -1,12 +1,6 @@
 """
 generate random data to use with the app.
 """
-if True:
-    import os
-    import sys
-
-    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
 from datetime import datetime
 from typing import List
 
@@ -15,6 +9,7 @@ from tortoise import BaseDBAsyncClient, Tortoise, connections, run_async
 
 from svc import wallet_messages
 from svc.auth import api
+from svc.config import config
 from svc.models.common import get_ulid
 from svc.models.user import User
 from svc.models.wallet import Transaction, Wallet
@@ -22,11 +17,11 @@ from svc.models.wallet import Transaction, Wallet
 faker_proxy = Faker()
 
 
-async def generate_data():
+async def _generate_data():
     import random
 
     await Tortoise.init(
-        db_url="sqlite://db.sqlite3",
+        db_url=config.DATABASE_CONN,
         modules={"models": ["svc.models"]},
     )
     await Tortoise.generate_schemas(safe=True)
@@ -62,5 +57,5 @@ async def generate_data():
         print(u, w, t)
 
 
-if __name__ == "__main__":
-    run_async(generate_data())
+def generate_data():
+    run_async(_generate_data())
