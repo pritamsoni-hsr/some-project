@@ -35,3 +35,10 @@ test-e2e:
 
 test-app:
 	yarn --cwd=app test
+
+
+build-docs:  # generate website from docs, and don't track generated code.
+	npx create-docusaurus@latest my-website classic --typescript
+	cd my-website && rm -rf docs blogs \
+		&& cp -r ../docs . && mv docs/docusaurus.config.js . \
+		&& mv ./src/css/custom.css . && rm -rf ./src
