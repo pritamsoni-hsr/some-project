@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -12,7 +12,8 @@ import { GoogleOAuthClientId, iOSClientId } from 'common/vars';
 
 export const useGoogle = () => {
   const setLoggedIn = useSetRecoilState(getAppState.loggedIn());
-  const [request, response, promptAsync] = useAuthRequest(
+  const [isExchangingToken, setExchangingToken] = useState(false);
+  const [, response, promptAsync] = useAuthRequest(
     {
       clientId: GoogleOAuthClientId,
       codeChallengeMethod: CodeChallengeMethod.S256,
@@ -30,6 +31,7 @@ export const useGoogle = () => {
   const exchangeIdToken = useCallback(
     async (token: string) => {
       try {
+        setExchangingToken(true);
         const { accessToken } = await api.auth.exchangeToken({
           exchangeTokenRequest: { provider: Providers.Google, token },
         });
@@ -38,6 +40,8 @@ export const useGoogle = () => {
       } catch (e) {
         const err = await getErrorMessage(e);
         Toast.show({ text1: 'Login failed', text2: `${err}` });
+      } finally {
+        setExchangingToken(false);
       }
     },
     [setLoggedIn],
@@ -49,15 +53,16 @@ export const useGoogle = () => {
     }
   }, [response, exchangeIdToken]);
 
-  return { onPress, request, response };
+  return { isExchangingToken, onPress };
 };
 
 export const useApple = () => {
   const setLoggedIn = useSetRecoilState(getAppState.loggedIn());
-
+  const [isExchangingToken, setExchangingToken] = useState(false);
   const exchangeIdToken = useCallback(
     async (token: string) => {
       try {
+        setExchangingToken(true);
         const { accessToken } = await api.auth.exchangeToken({
           exchangeTokenRequest: { provider: Providers.Apple, token },
         });
@@ -66,6 +71,8 @@ export const useApple = () => {
       } catch (e) {
         const err = await getErrorMessage(e);
         Toast.show({ text1: 'Login failed', text2: `${err}` });
+      } finally {
+        setExchangingToken(false);
       }
     },
     [setLoggedIn],
@@ -96,7 +103,7 @@ export const useApple = () => {
     }
   };
 
-  return { onPress };
+  return { isExchangingToken, onPress };
 };
 
 export const useLogout = () => {

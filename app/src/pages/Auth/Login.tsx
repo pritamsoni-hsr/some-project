@@ -14,6 +14,7 @@ const Login = () => {
   const { onPress: continueWithApple } = useApple();
   const { onPress: continueWithGoogle } = useGoogle();
 
+  // TODO: use `isExchangingToken` to disable navigation and show loading indicator
   return (
     <View style={[styles.page, theme.styles.sides]}>
       <Text variant={'h1'} weight={'thin'}>
