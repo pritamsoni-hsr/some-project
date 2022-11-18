@@ -1,6 +1,4 @@
-import { Text as RNText } from 'react-native';
-
-import { TextProps } from '@ui-kitten/components';
+import { TextProps, Text as UIText } from '@ui-kitten/components';
 
 type Props = Partial<{
   size: number;
@@ -14,7 +12,7 @@ type Props = Partial<{
 }>;
 
 export const Text = (props: TextProps & Props) => (
-  <RNText
+  <UIText
     {...props}
     accessible
     suppressHighlighting

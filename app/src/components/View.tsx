@@ -1,5 +1,11 @@
-import { View as RNView } from 'react-native';
+import { Layout, LayoutProps } from '@ui-kitten/components';
 
-import { LayoutProps } from '@ui-kitten/components';
-
-export const View = (props: LayoutProps) => <RNView {...props} />;
+type Props = {
+  level?: '0' | '1' | '2' | '3' | '4';
+};
+export const View = ({ level = '0', ...props }: Omit<LayoutProps, 'level'> & Props) =>
+  level === '0' ? (
+    <Layout {...props} style={[props.style, { backgroundColor: '#0000' }]} />
+  ) : (
+    <Layout {...props} level={level} />
+  );
