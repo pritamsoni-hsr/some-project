@@ -8,7 +8,7 @@ const AppLinkingConfig: LinkingOptions<AppRouting> = {
     screens: {
       Root: '',
       Login: 'login',
-      WebViewUrl: 'web-view-url',
+      HTMLView: 'web-view',
       NotFound: '*',
     },
   },
