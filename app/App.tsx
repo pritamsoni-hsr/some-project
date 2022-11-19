@@ -12,9 +12,9 @@ import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { enableExpoCliLogging } from 'expo/build/logs/Logs';
 import { RecoilRoot } from 'recoil';
 
+import { ErrorBoundary } from '@app/components';
 import { useAppState, useColorScheme, useTheme } from '@app/hooks';
-import AppRoutes, { navigationRef } from '@app/routes';
-import AppLinkingConfig from '@app/routes/linking';
+import AppRoutes, { AppLinkingConfig, navigationRef } from '@app/routes';
 import mapping from '@app/theme/mapping';
 import { queryClient } from 'common/query';
 
@@ -37,9 +37,11 @@ export default function App() {
           <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
           <IconRegistry icons={EvaIconsPack} />
           <Toast />
-          <RecoilRoot>
-            <NavContainer />
-          </RecoilRoot>
+          <ErrorBoundary>
+            <RecoilRoot>
+              <NavContainer />
+            </RecoilRoot>
+          </ErrorBoundary>
         </ApplicationProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
