@@ -6,7 +6,7 @@ type IProps = {
   direction?: 'horizontal' | 'vertical' | 'both' | 'fill';
 };
 
-const Spacer = ({ direction = 'vertical', size = 15 }: IProps) => {
+export const Spacer = ({ direction = 'vertical', size = 15 }: IProps) => {
   switch (direction) {
     case 'vertical':
       return <View style={{ height: size }} />;
@@ -19,7 +19,6 @@ const Spacer = ({ direction = 'vertical', size = 15 }: IProps) => {
   }
 };
 
-export default Spacer;
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },

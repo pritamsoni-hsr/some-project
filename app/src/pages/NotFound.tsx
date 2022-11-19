@@ -3,19 +3,21 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { StackScreenProps } from '@react-navigation/stack';
 
-import { View as Layout, Text } from '@app/components';
+import { Text, View } from '@app/components';
+import { useTheme } from '@app/hooks';
 
 const NotFoundScreen = ({ navigation }: StackScreenProps<AppRouting, 'NotFound'>) => {
+  const { spacing } = useTheme();
   // TODO navigate to page available irrespective of authentication status
   const onPress = () => navigation.replace('Login');
   return (
-    <Layout style={styles.container}>
+    <View style={[styles.container, { paddingHorizontal: spacing.gap }]}>
       <Text variant={'h4'}>Error 404.</Text>
       <Text>Resource you are looking for is not found.</Text>
       <TouchableOpacity style={styles.link} onPress={onPress}>
         <Text style={styles.linkText}>Go Back!</Text>
       </TouchableOpacity>
-    </Layout>
+    </View>
   );
 };
 
@@ -24,10 +26,8 @@ export default NotFoundScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff0',
   },
   link: {
     marginTop: 15,

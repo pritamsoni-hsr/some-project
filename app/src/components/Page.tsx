@@ -1,14 +1,13 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
-import { Layout } from '@ui-kitten/components';
-
 import { SidePadding } from './SidePadding';
+import { View } from './View';
 
 export const Page = (props: $Children) => {
   return (
     <SidePadding>
-      <Layout style={styles.page} {...props} />
+      <View style={styles.page} {...props} />
     </SidePadding>
   );
 };
