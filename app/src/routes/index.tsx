@@ -13,15 +13,16 @@ import AppLinkingConfig from './linking';
 const Stack = createStackNavigator<AppRouting>();
 
 const AppRoutes = () => {
-  const isLoggedIn = useRecoilValue(getAppState.loggedIn());
+  const isLoggedIn = useRecoilValue(getAppState.loggedIn);
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true, headerShadowVisible: false, headerBackTitleVisible: false }}>
+    <Stack.Navigator
+      screenOptions={{ title: '', headerShown: true, headerShadowVisible: false, headerBackTitleVisible: false }}>
       {isLoggedIn ? (
         <>
           <Stack.Screen component={FinanceApp} name={'Finance'} options={{ headerShown: false }} />
-          <Stack.Screen component={Pages.Preferences} name={'Preferences'} />
-          <Stack.Group screenOptions={{ headerTitle: '' }}>
+          <Stack.Screen component={Pages.Preferences} name={'Preferences'} options={{ title: 'Preferences' }} />
+          <Stack.Group>
             <Stack.Screen
               component={Pages.Finance.Transaction}
               name={'CreateTransaction'}
@@ -33,7 +34,7 @@ const AppRoutes = () => {
           </Stack.Group>
         </>
       ) : (
-        <Stack.Screen component={Pages.Login} name={'Login'} options={{ title: '' }} />
+        <Stack.Screen component={Pages.Login} name={'Login'} />
       )}
 
       <Stack.Screen
@@ -44,7 +45,7 @@ const AppRoutes = () => {
       <Stack.Screen
         component={Pages.HTMLView}
         name={'HTMLView'}
-        options={param => ({ headerTitle: param.route.params?.title || 'Web View' })}
+        options={param => ({ title: param.route.params?.title || 'Web View' })}
       />
       <Stack.Screen component={Pages.NotFound} name={'NotFound'} />
     </Stack.Navigator>

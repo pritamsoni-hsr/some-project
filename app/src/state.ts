@@ -12,9 +12,9 @@ const appState = atom<AppState>({
   },
 });
 
-const getAppState = () => appState;
+const getAppState = () => null;
 
-getAppState.loggedIn = () =>
+getAppState.loggedIn =
   selector({
     key: 'appState_loggedIn',
     get(opts) {

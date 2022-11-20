@@ -9,7 +9,7 @@ import { useLogout } from './useOAuth';
 
 describe('Test oauth hooks', () => {
   it('logout should clear the token from api and set app state loggedIn to false', async () => {
-    const { result: loginAction } = renderHook(() => useSetRecoilState(getAppState.loggedIn()));
+    const { result: loginAction } = renderHook(() => useSetRecoilState(getAppState.loggedIn));
 
     api.login('id-token');
     act(() => {
@@ -24,7 +24,7 @@ describe('Test oauth hooks', () => {
       result.current.handleLogout();
     });
 
-    const { result: state } = renderHook(() => useRecoilValue(getAppState.loggedIn()));
+    const { result: state } = renderHook(() => useRecoilValue(getAppState.loggedIn));
     expect(state.current).toEqual(false);
     expect(api.isLoggedIn()).toEqual(false);
   });

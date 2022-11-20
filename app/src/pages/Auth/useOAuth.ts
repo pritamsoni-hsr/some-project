@@ -11,7 +11,7 @@ import { Providers, api, getErrorMessage } from 'common';
 import { GoogleOAuthClientId, iOSClientId } from 'common/vars';
 
 export const useGoogle = () => {
-  const setLoggedIn = useSetRecoilState(getAppState.loggedIn());
+  const setLoggedIn = useSetRecoilState(getAppState.loggedIn);
   const [isExchangingToken, setExchangingToken] = useState(false);
   const [, response, promptAsync] = useAuthRequest(
     {
@@ -50,6 +50,7 @@ export const useGoogle = () => {
   useEffect(() => {
     if (response && response?.type === 'success' && response.params?.id_token) {
       exchangeIdToken(response.params.id_token);
+      console.log('1');
     }
   }, [response, exchangeIdToken]);
 
@@ -57,7 +58,7 @@ export const useGoogle = () => {
 };
 
 export const useApple = () => {
-  const setLoggedIn = useSetRecoilState(getAppState.loggedIn());
+  const setLoggedIn = useSetRecoilState(getAppState.loggedIn);
   const [isExchangingToken, setExchangingToken] = useState(false);
   const exchangeIdToken = useCallback(
     async (token: string) => {
@@ -107,7 +108,7 @@ export const useApple = () => {
 };
 
 export const useLogout = () => {
-  const setLoggedIn = useSetRecoilState(getAppState.loggedIn());
+  const setLoggedIn = useSetRecoilState(getAppState.loggedIn);
 
   const handleLogout = useCallback(() => {
     api.logout();
