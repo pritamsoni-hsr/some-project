@@ -25,7 +25,6 @@ export const Text = ({ size = 0, variant = 'body', weight = 'default', ...props 
     suppressHighlighting
     maxFontSizeMultiplier={1.2}
     minimumFontScale={0.8}
-    testID={'text'}
     style={[
       props.style,
       { textAlign: props.center ? 'center' : 'auto' },
@@ -33,6 +32,7 @@ export const Text = ({ size = 0, variant = 'body', weight = 'default', ...props 
       getFontWeight(weight),
       getFontSize(size),
     ]}
+    testID={'text'}
   />
 );
 

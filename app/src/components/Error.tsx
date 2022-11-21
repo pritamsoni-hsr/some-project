@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
+import { SidePadding } from './SidePadding';
 import { Text } from './Text';
 import { View } from './View';
 
@@ -12,7 +13,9 @@ Please try again later.
 export const Error = ({ message = defaultErrMessage }: { message?: string }) => {
   return (
     <View style={styles.page}>
-      <Text>{message}</Text>
+      <SidePadding>
+        <Text>{message}</Text>
+      </SidePadding>
     </View>
   );
 };

@@ -28,7 +28,7 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
   // amount 0 is not valid to store in database so this value is safe to use here.
   if (tx.amount === 0 && tx.createdAt) {
     return (
-      <View style={styles.dateHeader} level={'1'}>
+      <View level={'1'} style={styles.dateHeader}>
         <Text>{tx.createdAt.toDateString()}</Text>
       </View>
     );
@@ -52,6 +52,8 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
     />
   );
 });
+
+TxListItem.displayName = 'TxListItem';
 
 const getIcon = (tx: Transaction) => {
   if (!tx.isDebit) return IncomeTypeIcon.Income;

@@ -1,5 +1,5 @@
 {
-  "extends": ["@react-native-community"],
+  "extends": ["@react-native-community", "plugin:react/recommended"],
   "globals": {
     "__API_URL__": "readonly",
     "__COMMIT_ID__": "readonly",
@@ -9,6 +9,7 @@
     "NodeJS": "readonly",
     "SharedArrayBuffer": "readonly"
   },
+  "ignorePatterns": ["**/openapi/**", "coverage/**"],
   "overrides": [
     {
       "env": {
@@ -21,8 +22,6 @@
   "rules": {
     "curly": "off",
     "jsx-quotes": ["warn", "prefer-single"],
-    "quote-props": "off",
-    "quotes": ["warn", "single", { "avoidEscape": true }],
     "max-len": [
       "warn",
       {
@@ -30,9 +29,33 @@
         "comments": 124
       }
     ],
-    "no-extend-native": ["warn", { "exceptions": ["Date"] }],
+    "no-extend-native": [
+      "warn",
+      {
+        "exceptions": ["Date"]
+      }
+    ],
     "prettier/prettier": "off",
+    "quote-props": "off",
+    "quotes": [
+      "warn",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
     "react-native/no-inline-styles": "off",
+    "react/display-name": "off",
+    "react/jsx-sort-props": [
+      "warn",
+      {
+        "callbacksLast": true,
+        "ignoreCase": true,
+        "noSortAlphabetically": false,
+        "reservedFirst": true,
+        "shorthandFirst": true
+      }
+    ],
     "react/no-unstable-nested-components": "off",
     "react/react-in-jsx-scope": "off"
   }

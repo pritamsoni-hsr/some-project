@@ -30,7 +30,7 @@ export default class ErrorBoundary extends React.Component<$Children, { hasError
       return (
         <SafeAreaView style={styles.page}>
           <View style={styles.centered}>
-            <Text variant={'h4'} style={styles.label}>
+            <Text style={styles.label} variant={'h4'}>
               Something went wrong.
             </Text>
           </View>

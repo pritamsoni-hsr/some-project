@@ -19,7 +19,6 @@ export const Spacer = ({ direction = 'vertical', size = 15 }: IProps) => {
   }
 };
 
-
 const styles = StyleSheet.create({
   fill: { flex: 1 },
 });
