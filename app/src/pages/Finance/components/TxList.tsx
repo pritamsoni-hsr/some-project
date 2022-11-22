@@ -1,20 +1,23 @@
 import React, { useCallback, useMemo } from 'react';
 import { FlatList, ListRenderItem } from 'react-native';
 
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Divider, Spinner } from '@ui-kitten/components';
 import { useRecoilValue } from 'recoil';
 
-import { Error, Loader, Text } from '@app/components';
+import { Error, ListEmptyComponent, Loader, Text } from '@app/components';
 import { TransactionResponse as Transaction, useTransactions } from 'common';
 
 import { selectedWallet } from '../state';
 import { TxListItem, getHeaderIndexes, insertDateSeparator } from './TxListItem';
 
-export const TxList = () => {
+type Props = {
+  // add transaction button is positioned absolute, pass offset to allow last list item to be interactive.
+  bottomOffset: number;
+};
+
+export const TxList = (props: Props) => {
   const walletId = useRecoilValue(selectedWallet);
   const response = useTransactions({ walletId });
-  const bottomOffset = useBottomTabBarHeight();
 
   const { fetchNextPage, hasNextPage } = response;
 
@@ -29,15 +32,16 @@ export const TxList = () => {
   const staticHeaders = useMemo(() => getHeaderIndexes(data), [data]);
 
   if (!walletId) return <Text>Please select or create a wallet to start</Text>;
-  if (response.isLoading) return <Loader />;
+  if (response.isLoading) return <Loader fill />;
   if (response.isError) return <Error />;
 
   return (
     <FlatList
-      contentContainerStyle={{ paddingBottom: bottomOffset }}
+      contentContainerStyle={{ paddingBottom: props.bottomOffset, flexGrow: 1 }}
       data={data}
       ItemSeparatorComponent={Divider}
       keyExtractor={item => item.id}
+      ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={response.isFetchingNextPage && <Spinner />}
       renderItem={renderItem}
       stickyHeaderIndices={staticHeaders}

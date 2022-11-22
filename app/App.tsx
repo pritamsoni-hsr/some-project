@@ -5,7 +5,7 @@ import { enableFreeze, enableScreens } from 'react-native-screens';
 import Toast from 'react-native-toast-message';
 
 import * as eva from '@eva-design/eva';
-import { NavigationContainer, Theme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ApplicationProvider, IconRegistry, Spinner } from '@ui-kitten/components';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
@@ -22,7 +22,8 @@ enableScreens(true);
 enableFreeze(true);
 enableExpoCliLogging();
 
-export default function App() {
+// another component so that recoil hooks can be used
+const AppUI = () => {
   const { isAppReady } = useAppState();
 
   const scheme = useColorScheme();
@@ -31,24 +32,31 @@ export default function App() {
   if (!isAppReady) return null; // show loading animation with splash screen
 
   return (
+    <ErrorBoundary>
+      <ApplicationProvider {...eva} customMapping={mapping.customMapping} theme={evaTheme}>
+        <IconRegistry icons={EvaIconsPack} />
+        <Toast />
+        <NavContainer dark={scheme === 'dark'} />
+      </ApplicationProvider>
+    </ErrorBoundary>
+  );
+};
+
+export default function App() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <ApplicationProvider {...eva} customMapping={mapping.customMapping} theme={evaTheme}>
-          <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
-          <IconRegistry icons={EvaIconsPack} />
-          <Toast />
-          <ErrorBoundary>
-            <RecoilRoot>
-              <NavContainer />
-            </RecoilRoot>
-          </ErrorBoundary>
-        </ApplicationProvider>
-      </SafeAreaProvider>
+      <RecoilRoot>
+        <SafeAreaProvider>
+          <AppUI />
+        </SafeAreaProvider>
+      </RecoilRoot>
     </QueryClientProvider>
   );
 }
 
-const NavContainer = ({}: { theme?: Theme }) => {
+const onStateChange = () => {};
+
+const NavContainer = ({ dark = true }: { dark?: boolean }) => {
   const theme = useTheme();
   return (
     <NavigationContainer
@@ -57,12 +65,11 @@ const NavContainer = ({}: { theme?: Theme }) => {
       linking={AppLinkingConfig}
       theme={theme}
       onStateChange={onStateChange}>
+      <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
       <AppRoutes />
     </NavigationContainer>
   );
 };
-
-const onStateChange = () => {};
 
 // avoid date related warning in state
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
