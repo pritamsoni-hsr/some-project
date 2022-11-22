@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": ".",
+    "baseUrl": "app",
     "esModuleInterop": true,
     "jsx": "react-native",
     "lib": [
@@ -13,10 +13,10 @@
     "noEmit": true,
     "paths": {
       "@app/*": [
-        "./app/src/*"
+        "./src/*"
       ],
       "common/*": [
-        "./app/common/*"
+        "./common/*"
       ]
     },
     "resolveJsonModule": true,
