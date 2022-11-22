@@ -1,27 +1,39 @@
 {
-  "extends": ["@react-native-community", "plugin:react/recommended"],
+  "extends": [
+    "@react-native-community",
+    "plugin:react/recommended"
+  ],
   "globals": {
-    "__API_URL__": "readonly",
-    "__COMMIT_ID__": "readonly",
-    "__ENVIRONMENT__": "readonly",
     "Atomics": "readonly",
     "HTMLElement": "readonly",
     "NodeJS": "readonly",
-    "SharedArrayBuffer": "readonly"
+    "SharedArrayBuffer": "readonly",
+    "__API_URL__": "readonly",
+    "__COMMIT_ID__": "readonly",
+    "__ENVIRONMENT__": "readonly"
   },
-  "ignorePatterns": ["**/openapi/**", "coverage/**", "jest.config.ts"],
+  "ignorePatterns": [
+    "**/openapi/**",
+    "coverage/**",
+    "jest.config.ts"
+  ],
   "overrides": [
     {
       "env": {
         "jest": true
       },
-      "files": ["*.e2e.js"]
+      "files": [
+        "*.e2e.js"
+      ]
     }
   ],
   "root": true,
   "rules": {
     "curly": "off",
-    "jsx-quotes": ["warn", "prefer-single"],
+    "jsx-quotes": [
+      "warn",
+      "prefer-single"
+    ],
     "max-len": [
       "warn",
       {
@@ -32,7 +44,9 @@
     "no-extend-native": [
       "warn",
       {
-        "exceptions": ["Date"]
+        "exceptions": [
+          "Date"
+        ]
       }
     ],
     "prettier/prettier": "off",

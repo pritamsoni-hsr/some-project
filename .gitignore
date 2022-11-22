@@ -2,3 +2,14 @@ __pycache__
 
 # don't track generated schema
 openapi.json
+
+# app
+web-ui
+# docusaurus website
+my-website
+
+# react native app
+coverage
+.expo-shared
+.eslintcache
+app/common/api/openapi

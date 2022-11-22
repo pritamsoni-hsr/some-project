@@ -13,8 +13,8 @@ module.exports = function (api) {
         'module-resolver',
         {
           alias: {
-            '@app': './src',
-            'common': './common',
+            '@app': './app/src',
+            'common': './app/common',
           },
         },
       ],

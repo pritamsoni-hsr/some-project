@@ -9,3 +9,4 @@
 
 - [ ] sync docs to medium
 - [ ] github action to deploy docusaurus website `make build-docs && make deploy-docs`.
+- [ ] potentially move to trunk.io to manage all of these formatters and linters

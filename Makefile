@@ -1,7 +1,7 @@
 lint:
 	black svc
-	yarn --cwd=app run prettier --config=../.prettierrc --ignore-path=../.prettierignore -w .
-	# yarn --cwd=app run eslint --config=.eslintrc.json --fix .
+	yarn --cwd=. run prettier --config=.prettierrc --ignore-path=.prettierignore -w .
+	# yarn --cwd=. run eslint --config=.eslintrc.json --fix .
 
 gen-random-data:
 	python svc --action=generate-random-data
@@ -10,7 +10,7 @@ develop:
 	DEBUG=True python svc
 
 develop-app:
-	yarn --cwd=app start
+	yarn --cwd=. start
 
 serve:
 	python svc
@@ -34,7 +34,7 @@ test-e2e:
 	py.test -c=pytest.e2e.ini svc
 
 test-app:
-	yarn --cwd=app test
+	yarn --cwd=. test
 
 
 build-docs:  # generate website from docs, and don't track generated code.
