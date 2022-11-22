@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "com.pritamsoni.hsr.tnn"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "currentFullName": "@pritamsoni.hsr/tnn",
+    "extra": {
+      "eas": {
+        "projectId": "5165acb6-5ff8-405b-b2bb-daa807001d64"
+      }
+    },
+    "icon": "./assets/icon.png",
+    "ios": {
+      "supportsTablet": true
+    },
+    "name": "Tnn",
+    "orientation": "portrait",
+    "originalFullName": "@pritamsoni.hsr/tnn",
+    "privacy": "hidden",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "scheme": "tnn",
+    "slug": "tnn",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "image": "./assets/splash.png",
+      "resizeMode": "contain"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/5165acb6-5ff8-405b-b2bb-daa807001d64"
+    },
+    "userInterfaceStyle": "automatic",
+    "version": "1.0.0",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

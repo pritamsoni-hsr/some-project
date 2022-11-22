@@ -1,4 +1,13 @@
 {
+  "protoc": {
+    "compile_on_save": false,
+    "options": [
+      "-I=${workspaceRoot}/proto",
+      "-I=${workspaceRoot}/includes/googleapis",
+      "-I=${workspaceRoot}/includes/grpc-gateway"
+    ],
+    "path": "/usr/local/bin/protoc"
+  },
   "python.formatting.blackArgs": [
     "--line-length=119",
     "--pyi",
@@ -8,5 +17,8 @@
   "python.linting.flake8Args": [
     "--max-line-length=119",
     "--ignore=E731"
+  ],
+  "cSpell.words": [
+    "devsupport"
   ]
 }

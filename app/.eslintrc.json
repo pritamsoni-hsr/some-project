@@ -9,7 +9,7 @@
     "NodeJS": "readonly",
     "SharedArrayBuffer": "readonly"
   },
-  "ignorePatterns": ["**/openapi/**", "coverage/**"],
+  "ignorePatterns": ["**/openapi/**", "coverage/**", "jest.config.ts"],
   "overrides": [
     {
       "env": {

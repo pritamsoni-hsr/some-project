@@ -9,8 +9,17 @@ module.exports = function (api) {
     plugins: [
       ['@babel/plugin-proposal-decorators', { legacy: true }],
       ['babel-plugin-inline-import', { extensions: ['.svg', '.png'] }],
-      ['module-resolver', { alias: { '@app': './src','common': './src/common' } }],
+      [
+        'module-resolver',
+        {
+          alias: {
+            '@app': './src',
+            'common': './common',
+          },
+        },
+      ],
       'react-native-reanimated/plugin',
+      '@babel/plugin-proposal-export-namespace-from',
     ],
   };
 };

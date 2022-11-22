@@ -2,8 +2,9 @@
  * For a detailed explanation regarding each configuration property and type check, visit:
  * https://jestjs.io/docs/configuration
  */
+import type { Config } from 'jest';
 
-export default {
+const config: Config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -144,7 +145,7 @@ export default {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  // testEnvironment: "jest-environment-node",
+  testEnvironment: 'node',
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -179,6 +180,7 @@ export default {
   transformIgnorePatterns: [
     '<rootDir>/node_modules/?!(jest-)?react-native',
     '<rootDir>/node_modules/(@react-native-community|expo|expo(nent)?|@expo(nent)?/.*|@react-navigation|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|@unimodules/core/build/.*|sentry-expo|@sentry/.*)',
+    '<rootDir>/node_modules/expo-auth-session',
   ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
@@ -193,3 +195,5 @@ export default {
   // Whether to use watchman for file crawling
   // watchman: true,
 };
+
+export default config;
