@@ -7,6 +7,7 @@ from svc.common import LazyUser
 from svc.exceptions import UnauthorizedError
 from svc.utils import get_user
 
+from .wallet_category import get_symbol
 from .wallet_messages import (
     CreateTransactionRequest,
     CreateWalletRequest,
@@ -28,6 +29,7 @@ def to_wallet(obj: models.Wallet) -> WalletResponse:
         currency=obj.currency,
         category=obj.category or "income",
         created_at=obj.created_at,
+        currency_symbol=get_symbol(obj.currency),
     )
 
 
@@ -102,6 +104,7 @@ def to_transaction(obj: models.Transaction) -> TransactionResponse:
         more=TransactionMoreInfo(tags=[]),
         wallet_id=obj.wallet_id,
         category="",
+        currency_symbol=get_symbol(obj.currency),
     )
 
 

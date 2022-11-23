@@ -1,6 +1,7 @@
 import logging
-from typing import List
+from typing import Dict, List
 
+from faker.providers.currency import Provider
 from fastapi import APIRouter, Depends
 
 from svc import models
@@ -69,3 +70,18 @@ async def get_user_tags(query: str = "", user: LazyUser = Depends(get_user)):
     # max size of this set can be 2500
     user_tags = sorted(user_tags)
     return TagsListResponse(results=user_tags)
+
+
+class Currency(BaseModel):
+    code: str
+    name: str
+    symbol: str | None
+
+
+@router.get("/currencies", response_model=Dict[str, Currency])
+async def get_currencies():
+    return {code: Currency(code=code, name=name, symbol=get_symbol(code)) for code, name in Provider.currencies}
+
+
+def get_symbol(code: str) -> str:
+    return Provider.currency_symbols.get(code, code)
