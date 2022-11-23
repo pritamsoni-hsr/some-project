@@ -95,3 +95,8 @@ export const useDeleteWallet = () => {
     },
   });
 };
+
+// utils
+export const useCurrencies = () => {
+  return useQuery(['useCurrencies'], () => api.utils.getCurrencies());
+};
