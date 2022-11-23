@@ -11,7 +11,6 @@ import { TransactionResponse as Transaction } from 'common';
 import { DefaultCategoryData, IncomeTypeIcon } from '../data';
 import { useGetWalletById } from '../hooks';
 import { selectedWallet } from '../state';
-import { renderAmount } from '../utils';
 
 export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
   const { navigate } = useNavigation();
@@ -20,7 +19,7 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
   const wallet = useGetWalletById(walletId);
 
   const toDetailPage = () => {
-    navigate('CreateTransaction', { id: tx.id, item: tx });
+    navigate('TxDetail', { id: tx.id, item: tx });
   };
 
   if (!wallet) return null;
@@ -43,7 +42,9 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
       )}
       accessoryRight={() => (
         <View style={[styles.description]}>
-          <Text size={13}>{renderAmount(tx, wallet)}</Text>
+          <Text size={13}>
+            {tx.currencySymbol} {tx.amount}
+          </Text>
         </View>
       )}
       description={tx.category}

@@ -24,10 +24,10 @@ const AppRoutes = () => {
           <Stack.Screen component={Pages.Preferences} name={'Preferences'} options={{ title: 'Preferences' }} />
           <Stack.Group>
             <Stack.Screen
-              component={Pages.Finance.Transaction}
-              name={'CreateTransaction'}
+              component={Pages.Finance.TxDetail}
+              name={'TxDetail'}
               options={params => ({
-                headerRight: () => <Pages.Finance.Transaction.Header {...params} />,
+                headerRight: () => <Pages.Finance.TxDetail.Header {...params} />,
               })}
             />
             <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletDetail'} />

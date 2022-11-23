@@ -34,7 +34,7 @@ declare global {
 
     // create and detail wallet screens presented as modals
     WalletDetail?: DetailScreen<Wallet>;
-    CreateTransaction?: DetailScreen<Transaction>;
+    TxDetail?: DetailScreen<Transaction>;
 
     Finance: NavigatorScreenParams<FinanceRouting>;
     Wallets: undefined;
