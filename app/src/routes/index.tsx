@@ -30,7 +30,8 @@ const AppRoutes = () => {
                 headerRight: () => <Pages.Finance.Transaction.Header {...params} />,
               })}
             />
-            <Stack.Screen component={Pages.Finance.Wallet} name={'CreateWallet'} />
+            <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletDetail'} />
+            <Stack.Screen component={Pages.Finance.WalletList} name={'Wallets'} />
           </Stack.Group>
         </>
       ) : (
@@ -58,11 +59,12 @@ const FinanceApp = () => {
   return (
     <FinanceAppTabs.Navigator
       screenOptions={{
+        headerTitle: '',
         headerShadowVisible: false,
         tabBarStyle: { borderTopWidth: 0, elevation: 0, shadowOpacity: 0 },
       }}>
       <FinanceAppTabs.Screen component={Pages.Finance.List} name={'Transactions'} />
-      <FinanceAppTabs.Screen component={Pages.Finance.WalletList} name={'Wallets'} />
+      <FinanceAppTabs.Screen component={Pages.Finance.Preferences} name={'Preferences'} />
     </FinanceAppTabs.Navigator>
   );
 };

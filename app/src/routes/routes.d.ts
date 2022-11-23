@@ -13,7 +13,8 @@ declare global {
 
   type FinanceRouting = {
     Transactions: undefined;
-    Wallets: undefined;
+    // Wallets: undefined;
+    Preferences: undefined;
   };
 
   type AppRouting = {
@@ -32,10 +33,11 @@ declare global {
     Notes: NavigatorScreenParams<NotesRouting>;
 
     // create and detail wallet screens presented as modals
-    CreateWallet?: DetailScreen<Wallet>;
+    WalletDetail?: DetailScreen<Wallet>;
     CreateTransaction?: DetailScreen<Transaction>;
 
     Finance: NavigatorScreenParams<FinanceRouting>;
+    Wallets: undefined;
   };
 
   namespace ReactNavigation {
