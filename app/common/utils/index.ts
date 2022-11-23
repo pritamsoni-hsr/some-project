@@ -1,3 +1,4 @@
 export * from './cursor';
-export * from './numbers';
+export { DateTimeFormats } from './datetime';
 export * as ErrMessage from './errMessage';
+export * from './numbers';
