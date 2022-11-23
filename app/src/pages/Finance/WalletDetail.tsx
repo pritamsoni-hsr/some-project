@@ -22,7 +22,7 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
   const { id, item } = props.route.params ?? {};
 
   const formHooks = useForm<CreateWalletRequest>({
-    defaultValues: { ...item, category: Categories.Expense, currency: 'INR' },
+    defaultValues: { category: Categories.Expense, currency: 'INR', ...item },
   });
 
   const { mutate: onCreate } = useCreateWallet();
