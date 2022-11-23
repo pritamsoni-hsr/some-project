@@ -44,7 +44,7 @@ async def create_wallet(req: CreateWalletRequest, user: LazyUser = Depends(get_u
         user_id=user.id,
         icon=req.icon,
         name=req.name,
-        currency=req.currency,
+        currency=req.currency.value,
         category=req.category.value,
     )
     await obj.save()
@@ -70,7 +70,7 @@ async def update_wallet(id: str, req: CreateWalletRequest, user: LazyUser = Depe
     if req.name:
         obj.name = req.name
     if req.currency:
-        obj.currency = req.currency
+        obj.currency = req.currency.value
     if req.category:
         obj.category = req.category.value
     await obj.save()
@@ -125,7 +125,7 @@ async def create_transaction(
     obj = models.Transaction(
         note=req.note,
         amount=req.amount,
-        currency=req.currency,
+        currency=req.currency.value,
         wallet_id=wallet_id,
         user_id=user.id,
         created_at=req.created_at,
@@ -155,7 +155,7 @@ async def update_transaction(
     if req.amount:
         obj.amount = req.amount
     if req.currency:
-        obj.currency = req.currency
+        obj.currency = req.currency.value
     return to_transaction(obj)
 
 

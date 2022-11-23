@@ -14,12 +14,23 @@ class Categories(Enum):
     investment = "investment"
 
 
+class Currencies(Enum):
+    # TODO add additional currencies
+    INR = "INR"
+    USD = "USD"
+    GBP = "GBP"
+    EUR = "EUR"
+
+
 class CreateWalletRequest(BaseModel):
     Categories = Categories
     icon: str = Field(max_length=4)
     name: str
-    currency: str = Field(min_length=3, max_length=3, title="3 digit currency code")
-    category: Categories = Categories.expense
+    currency: Currencies | None = Field(
+        default=Currencies.INR,
+        title="3 digit currency code",
+    )
+    category: Categories | None = Categories.expense
 
 
 class WalletResponse(CreateWalletRequest):
@@ -39,7 +50,10 @@ class TransactionMoreInfo(BaseModel):
 class CreateTransactionRequest(BaseModel):
     note: str
     amount: float
-    currency: str
+    currency: Currencies | None = Field(
+        default=Currencies.INR,
+        title="3 digit currency code",
+    )
     more: TransactionMoreInfo
     created_at: datetime
 
@@ -48,7 +62,10 @@ class TransactionResponse(BaseModel):
     id: str
     note: str
     amount: float = Field()
-    currency: str = Field(max_length=3, title="3 digit currency code")
+    currency: Currencies | None = Field(
+        default=Currencies.INR,
+        title="3 digit currency code",
+    )
     more: TransactionMoreInfo
     category: str
     is_debit: str

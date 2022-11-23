@@ -6,6 +6,7 @@ from tortoise.exceptions import DoesNotExist
 from svc import models, wallet
 from svc.common import LazyUser
 from svc.exceptions import UnauthorizedError
+from svc.wallet_messages import Currencies
 
 
 @pytest.mark.anyio
@@ -34,7 +35,7 @@ async def test_create_wallet(user: models.User):
     )
     assert r.icon == "abc"
     assert r.name == "adsf"
-    assert r.currency == "INR"
+    assert r.currency == Currencies.INR
     assert r.category == wallet.CreateWalletRequest.Categories.expense
 
 
@@ -46,7 +47,7 @@ async def test_get_wallet(user: models.User):
     r = await wallet.get_wallet(id=obj.id, user=LazyUser(id=user.id))
     assert r.icon == "abc"
     assert r.name == "abc"
-    assert r.currency == "INR"
+    assert r.currency == Currencies.INR
 
     with pytest.raises(DoesNotExist):
         await wallet.get_wallet(id="obj.id", user=LazyUser(id=user.id))
@@ -92,7 +93,7 @@ async def test_create_transaction(user: models.User):
         req=wallet.CreateTransactionRequest(
             note="some-random-note",
             amount=12.20,
-            currency="INR",
+            currency=Currencies.INR,
             more=wallet.TransactionMoreInfo(),
             created_at=datetime(year=2022, month=10, day=1),
         ),
@@ -100,7 +101,7 @@ async def test_create_transaction(user: models.User):
     )
     assert r.note == "some-random-note"
     assert r.amount == 12.20
-    assert r.currency == "INR"
+    assert r.currency == Currencies.INR
     assert r.category == ""
     assert r.wallet_id == obj.id
 
@@ -115,7 +116,7 @@ async def test_get_transaction(user: models.User):
     r = await wallet.get_transaction(wallet_id=w.id, id=obj.id, user=LazyUser(id=user.id))
     assert r.amount == -12
     assert r.note == ""
-    assert r.currency == "INR"
+    assert r.currency == Currencies.INR
 
     with pytest.raises(DoesNotExist):
         await wallet.get_transaction(wallet_id=w.id, id="obj.id", user=LazyUser(id=user.id))
