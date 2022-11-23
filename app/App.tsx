@@ -35,8 +35,8 @@ const AppUI = () => {
     <ErrorBoundary>
       <ApplicationProvider {...eva} customMapping={mapping.customMapping} theme={evaTheme}>
         <IconRegistry icons={EvaIconsPack} />
-        <Toast />
         <NavContainer dark={scheme === 'dark'} />
+        <Toast />
       </ApplicationProvider>
     </ErrorBoundary>
   );
