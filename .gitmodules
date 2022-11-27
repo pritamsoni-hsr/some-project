@@ -1,0 +1,3 @@
+[submodule "svc/controllers"]
+	path = svc/controllers
+	url = git@github.com:pritamsoni-hsr/fin-controllers.git
