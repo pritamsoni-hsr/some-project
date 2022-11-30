@@ -4,34 +4,24 @@ import { Keyboard, ScrollView, StyleSheet } from 'react-native';
 
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
-import { Button, Input, Layout } from '@ui-kitten/components';
+import { Button, Datepicker, Input } from '@ui-kitten/components';
+import moment from 'moment';
 
-import {
-  ActivityBar,
-  DatePicker,
-  Error,
-  Grid,
-  Loader,
-  Selector,
-  SidePadding,
-  Spacer,
-  Text,
-  View,
-} from '@app/components';
+import { ActivityBar, Error, Grid, Icon, Loader, Row, SidePadding, Spacer, Text, View } from '@app/components';
 import { bottomSheetProps } from '@app/defaults';
 import { useBottomSheetRef, useTheme } from '@app/hooks';
 import {
+  Categories,
+  CreateTransactionRequest,
+  Currencies,
   ErrMessage,
-  TransactionResponse as Transaction,
-  Categories as TransactionBudgetEnum,
-  WalletResponse as Wallet,
-  Categories as WalletCategoryEnum,
+  TransactionResponse,
+  WalletResponse,
   populateError,
   useWallets,
 } from 'common';
 
-import { DefaultCategoryData } from '../data';
-import { useGetWalletById } from '../hooks';
+import { DefaultCategoryData, IncomeCategories } from '../data';
 import { CardIcon } from './CardIcon';
 
 enum IncomeType {
@@ -40,61 +30,47 @@ enum IncomeType {
   Transfer = 'transfer',
 }
 
-type FormInputs = Omit<Transaction, 'amount'> & {
-  additional: { onType: IncomeType };
-  wallet: string;
-  currency: string;
-  currencySymbol: string;
+type FormInputs = {
+  isDebit: boolean;
   amount: string;
-  budget: string;
+  walletId: string;
+  category: string;
+  createdAt: Date;
+  note: string;
+
+  tags: string[];
+  transferTo: string;
+
+  // only for ui
+  extra: {
+    budget: IncomeType;
+    walletCurrencyCode: Currencies;
+    walletCurrencySymbol: string;
+
+    transferToCurrencyCode: string;
+    transferToCurrencySymbol: string;
+  };
 };
 
 export const TransactionCreateOne = (props: {
-  tx?: Transaction;
-  onSubmit?: (e: Transaction, walletId: string) => Promise<Transaction>;
+  tx?: TransactionResponse;
+  wallet?: WalletResponse;
+  onSubmit?: (e: CreateTransactionRequest, walletId: string) => Promise<TransactionResponse>;
 }) => {
-  const formHooks = useForm<FormInputs>({
-    defaultValues: {
-      note: '',
-      createdAt: new Date().addDays(-1),
-      isDebit: true,
-      more: {
-        tags: [],
-        transferTo: '',
-        ...props.tx?.more,
-      },
-      ...props.tx,
-      amount: `${Math.abs(props.tx?.amount || 0) || ''}`,
-    },
-  });
-  const { setValue } = formHooks;
-
-  useEffect(() => {
-    if (props.tx?.more.transferTo) setValue('additional.onType', IncomeType.Transfer);
-    else if (!props.tx?.isDebit) setValue('additional.onType', IncomeType.Income);
-    else setValue('additional.onType', IncomeType.Expense);
-  }, [props.tx?.isDebit, props.tx?.more.transferTo, setValue]);
+  const sheetA = useBottomSheetRef();
+  const sheetB = useBottomSheetRef();
+  const navigation = useNavigation();
 
   const { colors } = useTheme();
   const backgroundColor = colors.background;
 
-  const editable = !false;
-
-  const navigation = useNavigation();
-
-  const sheetA = useBottomSheetRef();
-  const sheetB = useBottomSheetRef();
-
-  const isDebit = formHooks.watch('isDebit');
-
-  const currentWalletId = formHooks.watch('wallet');
-  const currentWallet = useGetWalletById(currentWalletId);
-  const currentWalletSymbol = currentWallet?.currencySymbol;
+  const formHooks = useForm<FormInputs>({
+    defaultValues: responseToForm(props.tx, props.wallet),
+  });
 
   const onSubmit = async (formData: FormInputs) => {
-    await props
-      .onSubmit?.({ ...formData, amount: Number(formData.amount) }, formData.wallet)
-      .catch(populateError(formHooks.setError));
+    await props.onSubmit?.({ ...formToRequest(formData) }, formData.walletId).catch(populateError(formHooks.setError));
+
     Keyboard.dismiss();
     formHooks.reset();
     navigation.canGoBack() && navigation.goBack();
@@ -103,50 +79,23 @@ export const TransactionCreateOne = (props: {
   return (
     <FormProvider {...formHooks}>
       <ScrollView keyboardDismissMode={'on-drag'}>
-        <Controller
-          control={formHooks.control}
-          name={'isDebit'}
-          render={({ field }) => (
-            <ActivityBar
-              options={[
-                { label: 'Expense', value: true },
-                { label: 'Income', value: false },
-              ]}
-              value={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
-
         <SidePadding>
+          <Controller
+            control={formHooks.control}
+            name={'isDebit'}
+            render={({ field }) => (
+              <ActivityBar
+                options={[
+                  { label: 'Expense', value: true },
+                  { label: 'Income', value: false },
+                ]}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
           <Spacer />
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start' }}>
-            <Text size={28}>{currentWalletSymbol}</Text>
-            <Controller
-              control={formHooks.control}
-              name={'amount'}
-              render={({ field, fieldState }) => (
-                <Input
-                  autoFocus
-                  enablesReturnKeyAutomatically
-                  caption={fieldState.error?.message}
-                  editable={editable}
-                  keyboardType={'numeric'}
-                  maxLength={9}
-                  returnKeyType={'done'}
-                  status={fieldState.error ? 'danger' : 'info'}
-                  style={{ minWidth: 140, borderWidth: 0, borderBottomWidth: 0.5, backgroundColor: '#0000' }}
-                  textStyle={{ fontSize: 20, marginHorizontal: 0 }}
-                  value={field.value}
-                  onChangeText={field.onChange}
-                />
-              )}
-              rules={{
-                required: ErrMessage.required(),
-                pattern: ErrMessage.pattern(/^\d{1,9}$/),
-              }}
-            />
-          </View>
+          <AmountInput />
           <Spacer />
 
           <Controller
@@ -157,11 +106,11 @@ export const TransactionCreateOne = (props: {
                 {...param.field}
                 caption={param.fieldState.error?.message}
                 clearButtonMode={'always'}
-                editable={editable}
                 label={'Note'}
                 placeholder={'Add Note'}
                 status={param.fieldState.error ? 'danger' : 'info'}
                 style={[styles.transparentInput, { borderBottomWidth: 1 }]}
+                textStyle={{ marginHorizontal: 0 }}
                 onChangeText={param.field.onChange}
               />
             )}
@@ -171,9 +120,9 @@ export const TransactionCreateOne = (props: {
           />
           <Spacer />
 
-          {/* <Controller
+          <Controller
             control={formHooks.control}
-            name={'more.tags'}
+            name={'tags'}
             render={({ field }) => (
               <Input
                 {...field}
@@ -183,69 +132,56 @@ export const TransactionCreateOne = (props: {
                 onChangeText={e => field.onChange(e.split(', '))}
               />
             )}
-          /> */}
+          />
           <Spacer />
 
           <TransferMoney />
-
-          <View style={{ alignItems: 'flex-start' }}>
-            <Controller
-              control={formHooks.control}
-              name={'createdAt'}
-              render={({ field }) => (
-                <DatePicker
-                  collapsable
-                  display={'compact'}
-                  maximumDate={new Date()}
-                  mode={'date'}
-                  value={field.value}
-                  onChange={d => {
-                    field.onChange(d);
-                    field.onBlur();
-                  }}
-                />
-              )}
-            />
-          </View>
-
           <Spacer />
-
-          {/* <TextWithInfo label='Category' onPress={() => navigation.navigate('FinanceCategories')} /> */}
-          {/* <TextWithInfo label='Budget' onPress={() => navigation.navigate('FinanceImportance')} /> */}
-          {/* <Spacer size={4} /> */}
           <Controller
             control={formHooks.control}
-            name={'budget'}
-            render={({ field: { ref: _, ...rest } }) => (
-              <Selector.Enum {...rest} label={'Budget'} options={TransactionBudgetEnum} placeholder={'budget'} />
+            name={'createdAt'}
+            render={({ field }) => (
+              <Datepicker
+                autoDismiss
+                date={field.value}
+                max={new Date()}
+                min={moment().add(-3, 'months').toDate()}
+                placeholder={'Select date'}
+                onSelect={d => {
+                  field.onChange(d);
+                  field.onBlur();
+                }}
+              />
             )}
           />
 
           <Spacer />
 
-          <Layout style={styles.row}>
-            <View style={[styles.row, { display: isDebit ? 'flex' : 'none' }]}>
+          <Row justifyContent={'center'}>
+            <Text>abc</Text>
+            <Spacer direction={'horizontal'} />
+            <Icon name={'arrow-forward'} status={'basic'} />
+            <Spacer direction={'horizontal'} />
+            <Text>abc</Text>
+          </Row>
+          <Row justifyContent={'space-between'}>
+            <Row>
               <Button size={'small'} style={styles.roundedButton} onPress={sheetA.open}>
                 From
               </Button>
               <Spacer direction={'horizontal'} />
-              <Button size={'small'} style={styles.roundedButton} onPress={sheetB.open}>
+              <Button size={'small'} status={'danger'} style={styles.roundedButton} onPress={sheetB.open}>
                 On
               </Button>
-            </View>
-            <View style={[{ display: !isDebit ? 'flex' : 'none' }]}>
-              <Button size={'small'} style={styles.roundedButton} onPress={sheetB.open}>
-                Select Account
-              </Button>
-            </View>
+            </Row>
             <Button
-              // disabled={formHooks.formState.isSubmitting || !formHooks.formState.isValid}
+              disabled={formHooks.formState.isSubmitting || !formHooks.formState.isValid}
               size={'small'}
               style={styles.roundedButton}
               onPress={formHooks.handleSubmit(onSubmit)}>
               Save
             </Button>
-          </Layout>
+          </Row>
         </SidePadding>
       </ScrollView>
 
@@ -260,30 +196,37 @@ export const TransactionCreateOne = (props: {
         ref={sheetB.ref}
         {...bottomSheetProps}
         backgroundStyle={[styles.sheetContainer, { backgroundColor }]}>
-        <Expenses onClose={sheetB.close} />
+        <TxCategoryPicker onClose={sheetB.close} />
       </BottomSheet>
     </FormProvider>
   );
 };
 
-type Collapsable = { onClose: () => void };
+type CloseHandler = { onClose: () => void };
 
-const WalletPicker = ({ onClose }: Collapsable) => {
+const WalletPicker = ({ onClose }: CloseHandler) => {
   const response = useWallets();
 
   const { setValue, watch } = useFormContext<FormInputs>();
-  const expenseWallet = watch('wallet');
+  const expenseWallet = watch('walletId');
+  const isDebit = watch('isDebit');
 
   const onPress = useCallback(
-    (value: string) => {
-      setValue('wallet', value);
+    (item: WalletResponse) => {
+      setValue('walletId', item.id);
+      setValue('extra.walletCurrencyCode', item.currency);
+      setValue('extra.walletCurrencySymbol', item.currencySymbol);
       setTimeout(() => onClose(), 200);
     },
     [setValue, onClose],
   );
 
+  const filterIncomeWallets = useCallback((e: WalletResponse) => e.category === Categories.Income, []);
+
   const renderItem = useCallback(
-    (item: Wallet) => <CardIcon {...item} key={item.id} selected={item.id === expenseWallet} onPress={onPress} />,
+    (item: WalletResponse) => (
+      <CardIcon {...item} key={item.id} selected={item.id === expenseWallet} onPress={onPress} />
+    ),
     [expenseWallet, onPress],
   );
 
@@ -292,42 +235,49 @@ const WalletPicker = ({ onClose }: Collapsable) => {
 
   return (
     <BottomSheetScrollView showsVerticalScrollIndicator={false}>
-      <Grid data={response.data.results} renderItem={renderItem} />
+      <Text center>Select Account</Text>
+      <Spacer />
+      <Grid
+        data={isDebit ? response.data.results : response.data.results.filter(filterIncomeWallets)}
+        renderItem={renderItem}
+      />
     </BottomSheetScrollView>
   );
 };
 
-const Expenses = ({ onClose }: Collapsable) => {
+const TxCategoryPicker = ({ onClose }: CloseHandler) => {
   const response = useWallets();
 
   const { setValue, watch, resetField } = useFormContext<FormInputs>();
   const isDebit = watch('isDebit');
 
   useEffect(() => {
-    if (isDebit) setValue('additional.onType', IncomeType.Expense);
-    else setValue('additional.onType', IncomeType.Income);
+    if (isDebit) setValue('extra.budget', IncomeType.Expense);
+    else setValue('extra.budget', IncomeType.Income);
   }, [isDebit, setValue]);
 
   const onPress = useCallback(
-    (onType: IncomeType) => (value: string) => {
+    (onType: IncomeType) => (value: WalletResponse | TransactionResponse) => {
       switch (onType) {
         case IncomeType.Income:
-          setValue('wallet', value);
+          setValue('walletId', value.id);
           setValue('category', 'Income');
-          setValue('more.transferTo', '');
-          setValue('additional.onType', IncomeType.Income);
+          setValue('transferTo', undefined);
+          setValue('extra.budget', IncomeType.Income);
           break;
         case IncomeType.Expense:
-          resetField('wallet');
-          setValue('category', value);
-          setValue('more.transferTo', '');
-          setValue('additional.onType', IncomeType.Expense);
+          resetField('walletId');
+          setValue('category', value.id);
+          setValue('transferTo', undefined);
+          setValue('extra.budget', IncomeType.Expense);
           break;
         case IncomeType.Transfer:
-          resetField('wallet');
+          resetField('walletId');
           setValue('category', 'Transfer');
-          setValue('more.transferTo', value);
-          setValue('additional.onType', IncomeType.Transfer);
+          setValue('transferTo', value.id);
+          setValue('extra.budget', IncomeType.Transfer);
+          setValue('extra.transferToCurrencyCode', value.currency);
+          setValue('extra.transferToCurrencySymbol', value.currencySymbol);
           break;
       }
       setTimeout(() => onClose(), 200);
@@ -336,28 +286,25 @@ const Expenses = ({ onClose }: Collapsable) => {
   );
 
   const isItemSelected = useCallback(
-    (itemId: string) => {
-      switch (watch('additional.onType')) {
+    (value: string) => {
+      switch (watch('extra.budget')) {
         case IncomeType.Income:
-          return watch('wallet') === itemId;
+          return watch('walletId') === value;
         case IncomeType.Expense:
-          return watch('category') === itemId;
+          return watch('category') === value;
         case IncomeType.Transfer:
-          return watch('more.transferTo') === itemId;
+          return watch('transferTo') === value;
       }
     },
     [watch],
   );
 
   const renderItem = useCallback(
-    (onType: IncomeType) => (item: typeof DefaultCategoryData[number] | Wallet) => {
-      const selected = isItemSelected(item.id);
-      return <CardIcon {...item} selected={selected} onPress={onPress(onType)} />;
+    (onType: IncomeType) => (item: typeof DefaultCategoryData[number] | WalletResponse) => {
+      return <CardIcon {...item} selected={isItemSelected(item.id)} onPress={onPress(onType)} />;
     },
     [onPress, isItemSelected],
   );
-
-  const filterIncomeWallets = useCallback((e: Wallet) => e.category === WalletCategoryEnum.Income, []);
 
   if (response.isLoading) return <Loader />;
   if (response.isError) return <Error />;
@@ -367,7 +314,7 @@ const Expenses = ({ onClose }: Collapsable) => {
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>
         <Text center>Income</Text>
         <Spacer />
-        <Grid data={response.data.results.filter(filterIncomeWallets)} renderItem={renderItem(IncomeType.Income)} />
+        <Grid data={IncomeCategories} renderItem={renderItem(IncomeType.Income)} />
       </BottomSheetScrollView>
     );
 
@@ -387,47 +334,132 @@ const Expenses = ({ onClose }: Collapsable) => {
 const TransferMoney = () => {
   const formHooks = useFormContext<FormInputs>();
 
-  const currentWallet = useGetWalletById(formHooks.watch('wallet'));
-  const transferToWallet = useGetWalletById(formHooks.watch('more.transferTo'));
+  const walletCurrency = formHooks.watch('extra.walletCurrencySymbol');
+  const transferToCurrency = formHooks.watch('extra.transferToCurrencySymbol');
 
-  if (formHooks.watch('additional.onType') !== IncomeType.Transfer) return null;
-  if (currentWallet.currency === transferToWallet?.currency) return null;
+  if (formHooks.watch('extra.budget') !== IncomeType.Transfer) return null;
+  if (walletCurrency === transferToCurrency) return null;
 
   return (
     <View>
       <Input
-        accessoryLeft={() => <Text>{currentWallet.currencySymbol}</Text>}
+        accessoryLeft={() => <Text>{transferToCurrency}</Text>}
         accessoryRight={() => (
-          <Text>
-            {currentWallet.currencySymbol} {'->'} {transferToWallet?.currencySymbol}
-          </Text>
+          <Row>
+            <Text>{walletCurrency}</Text>
+            <Icon name={'arrow-forward'} />
+            <Text>{transferToCurrency}</Text>
+          </Row>
         )}
-        label={'service charge'}
+        keyboardType={'numeric'}
+        label={'Amount received'}
+        maxLength={9}
+        returnKeyType={'done'}
       />
 
-      <Input accessoryLeft={() => <Text>{transferToWallet?.currencySymbol}</Text>} label={'Amount received'} />
+      <Input
+        accessoryLeft={() => <Text>{walletCurrency}</Text>}
+        keyboardType={'numeric'}
+        label={'service charge'}
+        maxLength={9}
+        returnKeyType={'done'}
+      />
     </View>
   );
 };
 
-/** given react hook form props convert to acceptable API request */
-export const propsToForm = () => {};
+const AmountInput = () => {
+  const formHooks = useFormContext<FormInputs>();
+  const currencySymbol = formHooks.watch('extra.walletCurrencySymbol');
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start' }}>
+      <Text size={28}>{currencySymbol}</Text>
+      <Controller
+        control={formHooks.control}
+        name={'amount'}
+        render={({ field, fieldState }) => (
+          <Input
+            autoFocus
+            enablesReturnKeyAutomatically
+            caption={fieldState.error?.message}
+            keyboardType={'numeric'}
+            maxLength={9}
+            returnKeyType={'done'}
+            status={fieldState.error ? 'danger' : 'info'}
+            style={{ minWidth: 140, borderWidth: 0, borderBottomWidth: 0.5, backgroundColor: '#0000' }}
+            textStyle={{ fontSize: 20, marginHorizontal: 0 }}
+            value={field.value}
+            onChangeText={field.onChange}
+          />
+        )}
+        rules={{
+          required: ErrMessage.required(),
+          pattern: ErrMessage.pattern(/^\d+\.?\d*$/),
+        }}
+      />
+    </View>
+  );
+};
 
 /** given API response convert to desired react hook form initial state */
-export const formToProps = () => {};
+const responseToForm = (tx: TransactionResponse, wallet?: WalletResponse): FormInputs =>
+  tx
+    ? {
+        isDebit: tx.isDebit,
+        amount: `${Math.abs(tx.amount || 0) || ''}`,
+        walletId: tx.walletId,
+        category: tx.category,
+        createdAt: tx.createdAt,
+        note: tx.note,
+        tags: tx.tags || [],
+        transferTo: tx.transferTo?.walletId,
+        extra: {
+          budget: IncomeType.Expense,
+          walletCurrencyCode: tx.currency,
+          walletCurrencySymbol: tx.currencySymbol,
+          transferToCurrencyCode: tx.transferTo?.currency?.code,
+          transferToCurrencySymbol: tx.transferTo?.currency?.symbol,
+        },
+      }
+    : {
+        isDebit: true,
+        amount: '',
+        walletId: wallet?.id,
+        category: '',
+        createdAt: moment(new Date()).add(-1, 'days').toDate(),
+        note: '',
+        tags: [],
+        transferTo: '',
+        extra: {
+          budget: IncomeType.Expense,
+          walletCurrencyCode: wallet?.currency,
+          walletCurrencySymbol: wallet?.currencySymbol,
+          transferToCurrencyCode: '',
+          transferToCurrencySymbol: '',
+        },
+      };
+
+/** given react hook form props convert to acceptable API request */
+const formToRequest = (formData: FormInputs): CreateTransactionRequest => ({
+  amount: formData.isDebit ? -Number(formData.amount) : Number(formData.amount),
+  category: formData.category,
+  createdAt: formData.createdAt,
+  note: formData.note,
+  currency: formData.extra.walletCurrencyCode,
+  // walletId: formData.walletId,
+  // currencySymbol: formData.extra.walletCurrencySymbol,
+  tags: formData.tags,
+  transferTo: {
+    walletId: formData.transferTo,
+    currency: {
+      code: formData.extra.walletCurrencyCode,
+      name: formData.extra.walletCurrencyCode,
+      symbol: formData.extra.walletCurrencySymbol,
+    },
+  },
+});
 
 const styles = StyleSheet.create({
-  amount: {
-    backgroundColor: '#0004',
-    fontSize: 32,
-    color: '#fff',
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   sheetContainer: {
     shadowOffset: {
       width: 0,
