@@ -5,9 +5,15 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { useRecoilValue } from 'recoil';
 
 import { Icon } from '@app/components';
-import { CreateTransactionRequest, useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from 'common';
+import {
+  CreateTransactionRequest,
+  getErrorMessage,
+  useCreateTransaction,
+  useDeleteTransaction,
+  useUpdateTransaction,
+} from 'common';
 
-import { TransactionCreateOne } from './components/TransactionCreateOne';
+import { TxCreate } from './components/TxCreate';
 import { selectedWallet } from './state';
 
 const TxDetail = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
@@ -24,6 +30,9 @@ const TxDetail = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
         onSuccess() {
           Toast.show({ text1: 'Transaction updated' });
         },
+        onError(error) {
+          getErrorMessage(error as any);
+        },
       },
     );
 
@@ -37,7 +46,7 @@ const TxDetail = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
       },
     );
 
-  return <TransactionCreateOne tx={item} wallet={wallet} onSubmit={id ? handleUpdate : handleSubmit} />;
+  return <TxCreate tx={item} wallet={wallet} onSubmit={id ? handleUpdate : handleSubmit} />;
 };
 
 const RightHeader = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
