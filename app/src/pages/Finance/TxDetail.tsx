@@ -5,13 +5,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { useRecoilValue } from 'recoil';
 
 import { Icon } from '@app/components';
-import {
-  CreateTransactionRequest,
-  getErrorMessage,
-  useCreateTransaction,
-  useDeleteTransaction,
-  useUpdateTransaction,
-} from 'common';
+import { CreateTransactionRequest, useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from 'common';
 
 import { TxCreate } from './components/TxCreate';
 import { selectedWallet } from './state';
@@ -29,9 +23,6 @@ const TxDetail = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
       {
         onSuccess() {
           Toast.show({ text1: 'Transaction updated' });
-        },
-        onError(error) {
-          getErrorMessage(error as any);
         },
       },
     );
@@ -51,9 +42,24 @@ const TxDetail = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
 
 const RightHeader = (props: StackScreenProps<AppRouting, 'TxDetail'>) => {
   const { id, item } = props.route.params ?? {};
-  const { mutate } = useDeleteTransaction();
+  const { mutateAsync } = useDeleteTransaction();
   if (!id) return null;
-  return <Icon default name={'edit'} onPress={() => mutate({ id, walletId: item.walletId })} />;
+  return (
+    <Icon
+      default
+      name={'edit'}
+      onPress={() =>
+        mutateAsync(
+          { id, walletId: item.walletId },
+          {
+            onSuccess() {
+              props.navigation.canGoBack() && props.navigation.goBack();
+            },
+          },
+        )
+      }
+    />
+  );
 };
 
 TxDetail.Header = RightHeader;
