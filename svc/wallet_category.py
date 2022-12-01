@@ -8,6 +8,7 @@ from svc import models
 from svc.common import BaseListModel, BaseModel, LazyUser
 
 from .utils import get_user
+from .wallet_messages import Currency
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class CategoryListResponse(BaseListModel):
 router = APIRouter(tags=["wallet-utils"])
 
 
-def to_category(obj: models.ExpenseCategory) -> Category:
+def to_category(obj: models.Category) -> Category:
     return Category(
         id=obj.id,
         icon=obj.icon,
@@ -41,9 +42,7 @@ def to_category(obj: models.ExpenseCategory) -> Category:
     response_model_exclude_none=True,
 )
 async def get_categories(user: LazyUser = Depends(get_user)):
-    return CategoryListResponse(
-        results=[to_category(obj) for obj in await models.ExpenseCategory.filter(user_id=user.id)]
-    )
+    return CategoryListResponse(results=[to_category(obj) for obj in await models.Category.filter(user_id=user.id)])
 
 
 class TagsListResponse(BaseListModel):
@@ -70,12 +69,6 @@ async def get_user_tags(query: str = "", user: LazyUser = Depends(get_user)):
     # max size of this set can be 2500
     user_tags = sorted(user_tags)
     return TagsListResponse(results=user_tags)
-
-
-class Currency(BaseModel):
-    code: str
-    name: str
-    symbol: str | None
 
 
 @router.get("/currencies", response_model=Dict[str, Currency])
