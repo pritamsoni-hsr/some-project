@@ -5,7 +5,7 @@ import pytz
 from tortoise.exceptions import ValidationError
 
 from .user import User
-from .wallet import ExpenseCategory, Transaction, Wallet
+from .wallet import Category, IncomeType, Transaction, Wallet
 
 
 @pytest.mark.anyio
@@ -19,7 +19,7 @@ async def test_create_wallet(user: User):
 
 @pytest.mark.anyio
 async def test_create_expense_category(user: User):
-    await ExpenseCategory.create(user=user, icon="", name="", categories="")
+    await Category.create(user=user, icon="", name="", categories="", type=IncomeType.Expense)
 
 
 @pytest.mark.anyio

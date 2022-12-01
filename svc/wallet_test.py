@@ -6,7 +6,7 @@ from tortoise.exceptions import DoesNotExist
 from svc import models, wallet
 from svc.common import LazyUser
 from svc.exceptions import UnauthorizedError
-from svc.wallet_messages import Currencies
+from svc.wallet_messages import Currencies, Currency, TransferTo
 
 
 @pytest.mark.anyio
@@ -94,16 +94,38 @@ async def test_create_transaction(user: models.User):
             note="some-random-note",
             amount=12.20,
             currency=Currencies.INR,
-            more=wallet.TransactionMoreInfo(),
             created_at=datetime(year=2022, month=10, day=1),
+            tags=["abc", "def"],
+            category="food",
         ),
         user=LazyUser(id=user.id),
     )
     assert r.note == "some-random-note"
     assert r.amount == 12.20
     assert r.currency == Currencies.INR
-    assert r.category == ""
+    assert r.category == "food"
     assert r.wallet_id == obj.id
+    assert r.tags == ["abc", "def"]
+    assert r.transfer_to is None
+
+
+@pytest.mark.anyio
+async def test_transfer_tx(user: models.User):
+    obj = await models.Wallet.create(icon="abc", name="abc", currency="INR", category="income", user_id=user.id)
+    r = await wallet.create_transaction(
+        wallet_id=obj.id,
+        req=wallet.CreateTransactionRequest(
+            note="some-random-note",
+            amount=12.20,
+            currency=Currencies.INR,
+            created_at=datetime(year=2022, month=10, day=1),
+            tags=["abc", "def"],
+            transfer_to=TransferTo(walletId="abc", currency=Currency(code="USD")),
+            category="",
+        ),
+        user=LazyUser(id=user.id),
+    )
+    assert r.transfer_to.walletId == "abc"
 
 
 @pytest.mark.anyio

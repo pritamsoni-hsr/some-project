@@ -18,6 +18,15 @@ class Categories(str, Enum):
 Currencies = StrEnum("Currencies", [(code, code) for code, _ in Provider.currencies])
 
 
+class Currency(BaseModel):
+    name: str | None
+    symbol: str | None
+    code: Currencies | None = Field(
+        default=Currencies.INR,
+        title="3 digit currency code",
+    )
+
+
 class CreateWalletRequest(BaseModel):
     Categories = Categories
     icon: str = Field(max_length=4)
@@ -39,28 +48,30 @@ class ListWalletResponse(BaseListModel):
     results: List[WalletResponse]
 
 
-class TransactionMoreInfo(BaseModel):
-    tags: Optional[List[str]]
-    transfer_to: Optional[str]
+class TransferTo(BaseModel):
+    walletId: str | None
+    currency: Currency | None
 
 
 class CreateTransactionRequest(BaseModel):
     note: str
     amount: float
+    category: str
     currency: Currencies | None = Field(
         default=Currencies.INR,
         title="3 digit currency code",
     )
-    more: TransactionMoreInfo
     created_at: datetime
+    tags: List[str] | None
+    transfer_to: TransferTo | None
 
 
 class TransactionResponse(CreateTransactionRequest):
-    id: str
+    id: str | None
     currency_symbol: str | None
-    category: str
-    is_debit: str
-    wallet_id: str
+    category: str | None
+    is_debit: bool | None
+    wallet_id: str | None
 
 
 class ListTransactionResponse(BaseListModel):

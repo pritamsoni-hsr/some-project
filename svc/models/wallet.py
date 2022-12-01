@@ -1,16 +1,26 @@
+from enum import Enum
+
 from tortoise import fields
 from tortoise.validators import MinLengthValidator
 
 from .common import AppOrmManager, BaseOrm
 
 
-class ExpenseCategory(BaseOrm):
+class IncomeType(str, Enum):
+    Income = "income"
+    Expense = "expense"
+    Transfer = "transfer"
+
+
+class Category(BaseOrm):
     user = fields.ForeignKeyField(model_name="models.User")
     icon = fields.TextField()
     name = fields.TextField()
+    type = fields.CharEnumField(enum_type=IncomeType, max_length=10)
     categories = fields.TextField()
 
     class Meta:
+        ordering = ["-created_at"]
         manager = AppOrmManager()
 
 
@@ -22,6 +32,7 @@ class Wallet(BaseOrm):
     category = fields.TextField()
 
     class Meta:
+        ordering = ["-created_at"]
         manager = AppOrmManager()
 
 
@@ -31,11 +42,13 @@ class Transaction(BaseOrm):
     amount = fields.FloatField()
     currency = fields.CharField(max_length=3, validators=[MinLengthValidator(3)])
     note = fields.TextField(null=True)
+    category = fields.TextField(null=True)
     created_at = fields.DatetimeField()
     more = fields.JSONField(null=True)
 
     class Meta:
         table = "tx"
+        ordering = ["-created_at", "-id"]
         manager = AppOrmManager()
 
     @property
