@@ -23,6 +23,7 @@ const AppRoutes = () => {
           <Stack.Screen component={FinanceApp} name={'Finance'} options={{ headerShown: false }} />
           <Stack.Screen component={Pages.Preferences} name={'Preferences'} options={{ title: 'Preferences' }} />
           <Stack.Group>
+            <Stack.Screen component={Pages.Finance.TxDetail} name={'TxCreate'} />
             <Stack.Screen
               component={Pages.Finance.TxDetail}
               name={'TxDetail'}
@@ -30,6 +31,7 @@ const AppRoutes = () => {
                 headerRight: () => <Pages.Finance.TxDetail.Header {...params} />,
               })}
             />
+            <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletCreate'} />
             <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletDetail'} />
             <Stack.Screen component={Pages.Finance.WalletList} name={'Wallets'} />
           </Stack.Group>
@@ -55,7 +57,7 @@ const AppRoutes = () => {
 
 const FinanceAppTabs = createBottomTabNavigator<FinanceRouting>();
 
-const FinanceApp = () => {
+const FAppTabs = () => {
   return (
     <FinanceAppTabs.Navigator
       screenOptions={{
@@ -63,9 +65,24 @@ const FinanceApp = () => {
         headerShadowVisible: false,
         tabBarStyle: { borderTopWidth: 0, elevation: 0, shadowOpacity: 0 },
       }}>
-      <FinanceAppTabs.Screen component={Pages.Finance.List} name={'Transactions'} />
+      <FinanceAppTabs.Screen component={Pages.Finance.TxHome} name={'Transactions'} />
       <FinanceAppTabs.Screen component={Pages.Finance.Preferences} name={'Preferences'} />
     </FinanceAppTabs.Navigator>
+  );
+};
+
+const FinanceAppStack = createStackNavigator<FinanceStack>();
+
+const FinanceApp = () => {
+  return (
+    <FinanceAppStack.Navigator screenOptions={{ headerShown: false }}>
+      <FinanceAppStack.Screen component={FAppTabs} name={'Home'} />
+      <FinanceAppStack.Screen
+        component={Pages.Finance.CategoryWise}
+        name={'TxByCategory'}
+        options={{ headerShown: true, headerTitle: '' }}
+      />
+    </FinanceAppStack.Navigator>
   );
 };
 

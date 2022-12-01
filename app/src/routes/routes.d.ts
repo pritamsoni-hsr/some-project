@@ -16,6 +16,12 @@ declare global {
     // Wallets: undefined;
     Preferences: undefined;
   };
+  type FinanceStack = {
+    Home: NavigatorScreenParams<FinanceRouting>;
+    TxByCategory?: {
+      id: string;
+    };
+  };
 
   type AppRouting = {
     Root: undefined;
@@ -32,11 +38,13 @@ declare global {
 
     Notes: NavigatorScreenParams<NotesRouting>;
 
-    // create and detail wallet screens presented as modals
     WalletDetail?: DetailScreen<Wallet>;
-    TxDetail?: DetailScreen<Transaction>;
+    WalletCreate: undefined;
 
-    Finance: NavigatorScreenParams<FinanceRouting>;
+    TxDetail?: DetailScreen<Transaction>;
+    TxCreate: undefined;
+
+    Finance: NavigatorScreenParams<FinanceStack>;
     Wallets: undefined;
   };
 
