@@ -9,4 +9,4 @@ from .auth import api
 async def test_create_categories_on_creating_user():
     await api.create_user(provider_id="oauth-id", provider="default")
     assert await models.User.filter().count() == 1
-    assert await models.ExpenseCategory.filter().count() == 21
+    assert await models.Category.filter().count() == 21

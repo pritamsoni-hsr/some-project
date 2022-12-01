@@ -13,7 +13,6 @@ from .wallet_messages import (
     CreateWalletRequest,
     ListTransactionResponse,
     ListWalletResponse,
-    TransactionMoreInfo,
     TransactionResponse,
     WalletResponse,
 )
@@ -99,12 +98,12 @@ def to_transaction(obj: models.Transaction) -> TransactionResponse:
         note=obj.note,
         amount=obj.amount,
         currency=obj.currency,
+        currency_symbol=get_symbol(obj.currency),
         created_at=obj.created_at,
         is_debit=obj.is_debit,
-        more=TransactionMoreInfo(tags=[]),
         wallet_id=obj.wallet_id,
-        category="",
-        currency_symbol=get_symbol(obj.currency),
+        category=obj.category or "",
+        **(obj.more or {}),
     )
 
 
@@ -125,6 +124,14 @@ async def create_transaction(
     req: CreateTransactionRequest,
     user: LazyUser = Depends(get_user),
 ):
+    more = {}
+    transfer_to = req.transfer_to
+    if transfer_to:
+        more.update(dict(transfer_to=transfer_to.dict()))
+    tags = req.tags
+    if tags:
+        more.update(dict(tags=tags))
+
     obj = models.Transaction(
         note=req.note,
         amount=req.amount,
@@ -132,6 +139,8 @@ async def create_transaction(
         wallet_id=wallet_id,
         user_id=user.id,
         created_at=req.created_at,
+        category=req.category,
+        more=more,
     )
     await obj.save()
 
@@ -159,6 +168,11 @@ async def update_transaction(
         obj.amount = req.amount
     if req.currency:
         obj.currency = req.currency.value
+    if req.category:
+        obj.category = req.category
+
+    await obj.save()
+
     return to_transaction(obj)
 
 
