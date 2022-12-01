@@ -3,26 +3,18 @@ import { StyleSheet } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import { ListItem } from '@ui-kitten/components';
-import { useRecoilValue } from 'recoil';
 
 import { Text, View } from '@app/components';
 import { TransactionResponse as Transaction } from 'common';
 
-import { DefaultCategoryData, IncomeTypeIcon } from '../data';
-import { useGetWalletById } from '../hooks';
-import { selectedWallet } from '../state';
+import { categoryName, getIcon } from './data';
 
 export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
   const { navigate } = useNavigation();
 
-  const walletId = useRecoilValue(selectedWallet);
-  const wallet = useGetWalletById(walletId);
-
   const toDetailPage = () => {
     navigate('TxDetail', { id: tx.id, item: tx });
   };
-
-  if (!wallet) return null;
 
   // amount 0 is not valid to store in database so this value is safe to use here.
   if (tx.amount === 0 && tx.createdAt) {
@@ -37,17 +29,16 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
     <ListItem
       accessoryLeft={params => (
         <Text {...params} style={styles.listIcon}>
-          {getIcon(tx)}
+          {getIcon(tx.category)}
         </Text>
       )}
       accessoryRight={() => (
         <View style={[styles.description]}>
-          <Text size={13}>
-            {tx.currencySymbol} {tx.amount}
-          </Text>
+          <Text size={13}>{tx.currencySymbol}</Text>
+          <Text>{tx.amount}</Text>
         </View>
       )}
-      description={tx.category}
+      description={categoryName(tx.category)}
       title={tx.note}
       onPress={toDetailPage}
     />
@@ -55,12 +46,6 @@ export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
 });
 
 TxListItem.displayName = 'TxListItem';
-
-const getIcon = (tx: Transaction) => {
-  if (!tx.isDebit) return IncomeTypeIcon.Income;
-  if (tx.more.transferTo) return IncomeTypeIcon.Transfer;
-  return DefaultCategoryData.find(e => e.id === tx.category || e.id === 'Misc')?.icon;
-};
 
 const dateHeader = (createdAt: Date): Transaction =>
   ({
@@ -70,16 +55,18 @@ const dateHeader = (createdAt: Date): Transaction =>
   } as Transaction);
 
 export const insertDateSeparator = (data: Transaction[] = []) =>
-  data.reduce<Transaction[]>(
-    (res, cur) =>
-      res.at(-1)?.createdAt.getDate() === cur?.createdAt.getDate()
-        ? [...res, cur]
-        : [...res, dateHeader(cur.createdAt), cur],
+  data.reduce<Transaction[]>((res, cur) => {
+    // array.at is not available on android.
+    return res?.slice(-1)[0]?.createdAt.getDate() === cur?.createdAt.getDate()
+      ? [...res, cur]
+      : [...res, dateHeader(cur.createdAt), cur];
+  }, []);
+
+export const getHeaderIndexes = (data: Transaction[], startFrom = 0) => {
+  return data.reduce<number[]>(
+    (indexes, e, idx) => (e.amount === 0 ? [...indexes, idx + startFrom] : [...indexes]),
     [],
   );
-
-export const getHeaderIndexes = (data: Transaction[]) => {
-  return data.reduce<number[]>((indexes, e, idx) => (e.amount === 0 ? [...indexes, idx] : [...indexes]), []);
 };
 
 const styles = StyleSheet.create({

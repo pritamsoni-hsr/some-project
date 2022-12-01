@@ -1,59 +1,74 @@
-import React, { useEffect } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
-import { useNavigation } from '@react-navigation/native';
-import { Button } from '@ui-kitten/components';
 import { useRecoilState } from 'recoil';
+import useDeepCompareEffect from 'use-deep-compare-effect';
 
-import { Error, Loader, Pressable, Row, Spacer, Text } from '@app/components';
+import { Error, Loader, Pressable, Row, Spacer, Text, View } from '@app/components';
 import { WalletResponse, useWallets } from 'common';
 
 import { selectedWallet } from '../state';
 import { AddWalletButton } from './AddWalletButton';
 
 export const WalletCarousel = () => {
+  const [wallet, setWallet] = useRecoilState(selectedWallet);
   const response = useWallets();
-  const navigation = useNavigation();
+  const scrollX = useSharedValue(0);
 
-  const [walletId, setWalletId] = useRecoilState(selectedWallet);
+  const handleScroll = useAnimatedScrollHandler(event => {
+    scrollX.value = event.contentOffset.x;
+  });
+
+  const txStyle = useAnimatedStyle(() => {
+    return { transform: [{ translateX: scrollX.value }], zIndex: 12, position: 'absolute' };
+  }, [scrollX]);
+
   const firstWallet = response.data?.results?.[0];
 
-  useEffect(() => {
-    setWalletId(firstWallet?.id!);
-  }, [setWalletId, firstWallet?.id]);
+  useDeepCompareEffect(() => {
+    firstWallet && setWallet(x => (x ? { ...x } : firstWallet));
+  }, [setWallet, firstWallet, []]);
 
   if (response.isLoading) return <Loader />;
   if (response.isError) return <Error />;
-  // no empty state, BE will ensure that user has atleast one wallet.
 
   return (
-    <ScrollView horizontal contentContainerStyle={styles.list} showsHorizontalScrollIndicator={false}>
-      <AddWalletButton />
-      <Spacer direction={'horizontal'} />
+    <Animated.ScrollView
+      horizontal
+      contentContainerStyle={styles.list}
+      scrollEventThrottle={16}
+      showsHorizontalScrollIndicator={false}
+      onScroll={handleScroll}>
+      <Animated.View style={txStyle}>
+        <View level={'1'} style={{ padding: 6, borderTopRightRadius: 12, borderBottomRightRadius: 12 }}>
+          <AddWalletButton />
+          <Spacer direction={'horizontal'} />
+        </View>
+      </Animated.View>
+      <Spacer direction={'horizontal'} size={40} />
 
-      <Button onPress={() => navigation.navigate('Wallets')}>Manage</Button>
-      <Spacer direction={'horizontal'} />
-
-      {response.data.results?.map(w => (
+      {response.data.results.map(w => (
         <React.Fragment key={w.id}>
-          <WalletCarouselItem key={w.id} isSelected={w.id === walletId} selectWallet={setWalletId} wallet={w} />
+          <WalletCarouselItem key={w.id} isSelected={w.id === wallet?.id} selectWallet={setWallet} wallet={w} />
           <Spacer direction={'horizontal'} />
         </React.Fragment>
       ))}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 };
 
 type ItemProps = {
   wallet: WalletResponse;
   isSelected: boolean;
-  selectWallet: (e: string) => void;
+  selectWallet: (e: WalletResponse) => void;
 };
+
 const WalletCarouselItem = ({ wallet, isSelected, selectWallet }: ItemProps) => {
   return (
     <Pressable
-      style={[styles.walletItem, { backgroundColor: isSelected ? '#f009' : '#040' }]}
-      onPress={() => selectWallet(wallet.id)}>
+      style={[styles.walletItem, { backgroundColor: isSelected ? '#f009' : '#040', borderWidth: isSelected ? 2 : 0 }]}
+      onPress={() => selectWallet(wallet)}>
       <Row justifyContent={'space-between'}>
         <Text>{wallet.name}</Text>
         <Text>{wallet.icon}</Text>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { Keyboard } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { StackScreenProps } from '@react-navigation/stack';
@@ -34,8 +35,12 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
       { createWalletRequest },
       {
         onError: populateError(formHooks.setError),
-        onSettled() {
+        onSuccess() {
           Toast.show({ type: 'success', text1: 'Added wallet' });
+
+          Keyboard.dismiss();
+          formHooks.reset();
+          props.navigation.canGoBack() && props.navigation.goBack();
         },
       },
     );
@@ -49,6 +54,7 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
         onSuccess(response) {
           Toast.show({ type: 'success', text1: 'Updated wallet' });
           props.navigation.setParams({ id: response.id, item: response });
+          Keyboard.dismiss();
         },
       },
     );
@@ -90,7 +96,8 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
           )}
           rules={{
             required: ErrMessage.required(),
-            minLength: ErrMessage.minLength(4),
+            minLength: ErrMessage.minLength(1),
+            maxLength: ErrMessage.maxLength(4),
           }}
         />
         <Spacer />
@@ -108,7 +115,7 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
           )}
           rules={{
             required: ErrMessage.required(),
-            minLength: ErrMessage.minLength(4),
+            minLength: ErrMessage.minLength(2),
           }}
         />
         <Spacer />
@@ -119,6 +126,7 @@ export const WalletDetail = (props: StackScreenProps<AppRouting, 'WalletDetail'>
             <Selector.Enum
               {...field}
               caption={fieldState.error?.message}
+              disabled={!!id} // currency cannot be changed.
               label={'currency'}
               options={Currencies}
               placeholder={Currencies.Inr}
