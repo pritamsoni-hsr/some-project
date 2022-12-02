@@ -1,6 +1,9 @@
 import React, { ReactElement } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
+import Pressable from './Pressable';
+import { Text } from './Text';
+
 const MARGIN = 2;
 
 export const Grid = <T extends { id?: string }>({
@@ -10,6 +13,7 @@ export const Grid = <T extends { id?: string }>({
   data: T[];
   renderItem: (item: T) => ReactElement;
   itemsPerColumn?: number;
+  onPressAdd?: () => void;
 }) => {
   const { width: deviceWidth } = useWindowDimensions();
   const cardWidth = (deviceWidth - 30) / itemsPerColumn;
@@ -21,6 +25,16 @@ export const Grid = <T extends { id?: string }>({
           {props.renderItem(item)}
         </View>
       ))}
+      {!!props.onPressAdd && (
+        <Pressable
+          style={[styles.gridItem, { justifyContent: 'center', width: cardWidth, height: cardWidth }]}
+          onPress={props.onPressAdd}>
+          {/* TODO: use icon */}
+          <Text center size={32} weight={'thin'}>
+            +
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 };
@@ -34,7 +48,7 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     margin: MARGIN,
-    padding: 1,
-    backgroundColor: '#f004',
+    borderWidth: 1,
+    borderColor: '#f004',
   },
 });

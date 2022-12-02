@@ -17,6 +17,7 @@ class Category(BaseModel):
     id: str
     icon: str
     name: str
+    type: models.wallet.IncomeType | None
     sub_categories: List[str]
 
 
@@ -36,24 +37,28 @@ def to_category(obj: models.Category) -> Category:
     )
 
 
-@router.get(
-    "/expense-categories",
-    response_model=CategoryListResponse,
-    response_model_exclude_none=True,
-)
+@router.get("/expense-categories", response_model=CategoryListResponse)
 async def get_categories(user: LazyUser = Depends(get_user)):
     return CategoryListResponse(results=[to_category(obj) for obj in await models.Category.filter(user_id=user.id)])
+
+
+@router.post("/expense-categories", response_model=Category)
+async def post_categories(category: Category, user: LazyUser = Depends(get_user)):
+    obj = await models.Category.create(
+        id=category.id,
+        icon=category.icon,
+        name=category.name,
+        categories=", ".join(category.sub_categories),
+        user_id=user.id,
+    )
+    return to_category(obj)
 
 
 class TagsListResponse(BaseListModel):
     results: List[str]
 
 
-@router.get(
-    "/tags",
-    response_model=TagsListResponse,
-    response_model_exclude_none=True,
-)
+@router.get("/tags", response_model=TagsListResponse)
 async def get_user_tags(query: str = "", user: LazyUser = Depends(get_user)):
     """
     return all tags a user has used in past.

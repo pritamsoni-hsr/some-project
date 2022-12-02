@@ -15,7 +15,7 @@ type Props = {
 
 export const arrayToText = (props: Props) => {
   return {
-    value: props.value.join(','),
+    value: props.value?.join(','),
     onChangeText: (arr: string) => {
       props.onChange(arr.split(','));
     },

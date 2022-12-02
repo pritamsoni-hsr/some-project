@@ -34,6 +34,8 @@ const AppRoutes = () => {
             <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletCreate'} />
             <Stack.Screen component={Pages.Finance.WalletDetail} name={'WalletDetail'} />
             <Stack.Screen component={Pages.Finance.WalletList} name={'Wallets'} />
+            <Stack.Screen component={Pages.Finance.Categories} name={'Categories'} />
+            <Stack.Screen component={Pages.Finance.CategoryCreate} name={'CategoryCreate'} />
           </Stack.Group>
         </>
       ) : (
@@ -75,13 +77,9 @@ const FinanceAppStack = createStackNavigator<FinanceStack>();
 
 const FinanceApp = () => {
   return (
-    <FinanceAppStack.Navigator screenOptions={{ headerShown: false }}>
-      <FinanceAppStack.Screen component={FAppTabs} name={'Home'} />
-      <FinanceAppStack.Screen
-        component={Pages.Finance.CategoryWise}
-        name={'TxByCategory'}
-        options={{ headerShown: true, headerTitle: '' }}
-      />
+    <FinanceAppStack.Navigator screenOptions={{ headerShown: true, headerTitle: '' }}>
+      <FinanceAppStack.Screen component={FAppTabs} name={'Home'} options={{ headerShown: false }} />
+      <FinanceAppStack.Screen component={Pages.Finance.CategoryWise} name={'TxByCategory'} />
     </FinanceAppStack.Navigator>
   );
 };

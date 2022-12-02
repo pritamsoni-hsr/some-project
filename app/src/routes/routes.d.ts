@@ -46,6 +46,9 @@ declare global {
 
     Finance: NavigatorScreenParams<FinanceStack>;
     Wallets: undefined;
+
+    Categories: undefined;
+    CategoryCreate: undefined;
   };
 
   namespace ReactNavigation {

@@ -312,6 +312,7 @@ type CloseHandler = { onClose: () => void };
 const WalletPicker = ({ onClose }: CloseHandler) => {
   const response = useWallets();
 
+  const { navigate } = useNavigation();
   const { setValue, watch } = useFormContext<FormInputs>();
 
   const isDebit = watch('isDebit');
@@ -352,6 +353,7 @@ const WalletPicker = ({ onClose }: CloseHandler) => {
       <Grid
         data={response.data.results.filter(isDebit ? filterOutReceivers : filterIncomeWallet)}
         renderItem={renderItem}
+        onPressAdd={() => navigate('WalletCreate')}
       />
     </BottomSheetScrollView>
   );
@@ -360,6 +362,7 @@ const WalletPicker = ({ onClose }: CloseHandler) => {
 const TxCategoryPicker = ({ onClose }: CloseHandler) => {
   const response = useWallets();
 
+  const { navigate } = useNavigation();
   const { setValue, watch, trigger } = useFormContext<FormInputs>();
 
   const isDebit = watch('isDebit');
@@ -436,11 +439,16 @@ const TxCategoryPicker = ({ onClose }: CloseHandler) => {
       <Grid
         data={SpendCategories.filter(e => e.type === IncomeType.Expense)}
         renderItem={renderItem(IncomeType.Expense)}
+        onPressAdd={() => navigate('CategoryCreate')}
       />
 
       <Text center>Transfer</Text>
       <Spacer />
-      <Grid data={response.data.results.filter(e => e.id !== selectedWallet)} renderItem={renderWalletItem} />
+      <Grid
+        data={response.data.results.filter(e => e.id !== selectedWallet)}
+        renderItem={renderWalletItem}
+        onPressAdd={() => navigate('WalletCreate')}
+      />
     </BottomSheetScrollView>
   );
 };

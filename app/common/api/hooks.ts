@@ -7,6 +7,7 @@ import {
   DeleteTransactionRequest,
   DeleteWalletRequest,
   GetTransactionsRequest,
+  PostCategoriesRequest,
   UpdateTransactionRequest,
   UpdateWalletRequest,
 } from './openapi';
@@ -99,4 +100,13 @@ export const useDeleteWallet = () => {
 // utils
 export const useCurrencies = () => {
   return useQuery(['useCurrencies'], () => api.utils.getCurrencies());
+};
+
+export const useCreateCategory = () => {
+  const client = useQueryClient();
+  return useMutation((req: PostCategoriesRequest) => api.utils.postCategories(req), {
+    onSuccess() {
+      client.invalidateQueries();
+    },
+  });
 };
