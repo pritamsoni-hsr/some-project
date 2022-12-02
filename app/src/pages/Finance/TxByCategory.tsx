@@ -8,7 +8,7 @@ import { Error, Loader, SidePadding, Text, View } from '@app/components';
 import { TransactionResponse, useTransactions } from 'common';
 
 import { TxListItem } from './components/TxListItem';
-import { categoryName } from './components/data';
+import { categoryName } from './data';
 import { selectedWalletId } from './state';
 
 export const TxByCategory = (props: StackScreenProps<FinanceStack, 'TxByCategory'>) => {

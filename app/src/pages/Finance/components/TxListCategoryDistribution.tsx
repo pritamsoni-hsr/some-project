@@ -10,8 +10,8 @@ import { useRecoilValue } from 'recoil';
 import { Error, Icon, ListEmptyComponent, Loader, Page, Spinner, Text, View } from '@app/components';
 import { useTransactions } from 'common';
 
+import { categoryName } from '../data';
 import { selectedWalletId } from '../state';
-import { categoryName } from './data';
 
 type Props = {
   bottomOffset: number;

@@ -7,7 +7,7 @@ import { ListItem } from '@ui-kitten/components';
 import { Text, View } from '@app/components';
 import { TransactionResponse as Transaction } from 'common';
 
-import { categoryName, getIcon } from './data';
+import { categoryName, getIcon } from '../data';
 
 export const TxListItem = React.memo(({ item: tx }: { item: Transaction }) => {
   const { navigate } = useNavigation();

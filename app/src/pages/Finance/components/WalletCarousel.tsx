@@ -2,18 +2,23 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
+import { useNavigation } from '@react-navigation/native';
+import { Button } from '@ui-kitten/components';
 import { useRecoilState } from 'recoil';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 
-import { Error, Loader, Pressable, Row, Spacer, Text, View } from '@app/components';
+import { Error, Loader, Pressable, Row, SidePadding, Spacer, Text, View } from '@app/components';
+import { Icon } from '@app/components';
 import { WalletResponse, useWallets } from 'common';
 
 import { selectedWallet } from '../state';
-import { AddWalletButton } from './AddWalletButton';
 
 export const WalletCarousel = () => {
   const [wallet, setWallet] = useRecoilState(selectedWallet);
   const response = useWallets();
+  const { navigate } = useNavigation();
+  const toCreateWallet = () => navigate('WalletCreate');
+
   const scrollX = useSharedValue(0);
 
   const handleScroll = useAnimatedScrollHandler(event => {
@@ -32,7 +37,12 @@ export const WalletCarousel = () => {
 
   if (response.isLoading) return <Loader />;
   if (response.isError) return <Error />;
-
+  if (response.data?.results?.length === 0)
+    return (
+      <SidePadding>
+        <Button onPress={toCreateWallet}>Create Wallet</Button>
+      </SidePadding>
+    );
   return (
     <Animated.ScrollView
       horizontal
@@ -42,7 +52,7 @@ export const WalletCarousel = () => {
       onScroll={handleScroll}>
       <Animated.View style={txStyle}>
         <View level={'1'} style={{ padding: 6, borderTopRightRadius: 12, borderBottomRightRadius: 12 }}>
-          <AddWalletButton />
+          <Icon name={'plus-circle-outline'} size={20} onPress={toCreateWallet} />
           <Spacer direction={'horizontal'} />
         </View>
       </Animated.View>

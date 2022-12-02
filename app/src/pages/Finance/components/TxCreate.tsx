@@ -16,14 +16,15 @@ import {
   CreateTransactionRequest,
   Currencies,
   ErrMessage,
+  IncomeType,
   TransactionResponse,
   WalletResponse,
   populateError,
   useWallets,
 } from 'common';
 
+import { SpendCategories } from '../data';
 import { CardIcon } from './CardIcon';
-import { IncomeType, SpendCategories } from './data';
 
 const FeedbackTimeoutMS = 350; // debounce timeout to make transition smooth for visual feedback to the user
 

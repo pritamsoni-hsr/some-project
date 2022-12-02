@@ -79,7 +79,7 @@ const FinanceApp = () => {
   return (
     <FinanceAppStack.Navigator screenOptions={{ headerShown: true, headerTitle: '' }}>
       <FinanceAppStack.Screen component={FAppTabs} name={'Home'} options={{ headerShown: false }} />
-      <FinanceAppStack.Screen component={Pages.Finance.CategoryWise} name={'TxByCategory'} />
+      <FinanceAppStack.Screen component={Pages.Finance.TxByCategory} name={'TxByCategory'} />
     </FinanceAppStack.Navigator>
   );
 };
