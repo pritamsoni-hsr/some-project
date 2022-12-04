@@ -29,6 +29,7 @@ def to_wallet(obj: models.Wallet) -> WalletResponse:
         category=obj.category or "income",
         created_at=obj.created_at,
         currency_symbol=get_symbol(obj.currency),
+        value=0,
     )
 
 

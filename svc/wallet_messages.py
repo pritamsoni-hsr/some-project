@@ -42,6 +42,7 @@ class WalletResponse(CreateWalletRequest):
     id: str
     created_at: Optional[datetime]
     currency_symbol: str | None
+    value: float = Field(description="total amount in the wallet")
 
 
 class ListWalletResponse(BaseListModel):
