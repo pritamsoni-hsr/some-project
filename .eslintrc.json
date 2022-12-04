@@ -14,7 +14,7 @@
   },
   "ignorePatterns": [
     "**/openapi/**",
-    "coverage/**",
+    "**/coverage/**",
     "jest.config.ts"
   ],
   "overrides": [
@@ -38,7 +38,8 @@
       "warn",
       {
         "code": 119,
-        "comments": 124
+        "comments": 124,
+        "ignoreUrls": true
       }
     ],
     "no-extend-native": [
@@ -60,6 +61,14 @@
     ],
     "react-native/no-inline-styles": "off",
     "react/display-name": "off",
+    "react/jsx-curly-brace-presence": [
+      "warn",
+      {
+        "children": "never",
+        "propElementValues": "always",
+        "props": "always"
+      }
+    ],
     "react/jsx-sort-props": [
       "warn",
       {
