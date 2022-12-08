@@ -14,7 +14,7 @@ import _ from 'lodash';
 import { Text, View } from '@app/components';
 
 const ITEM_HEIGHT = 30;
-const SCALE = 10; // must be even
+const SCALE = 5; // must be odd
 const PICKER_HEIGHT = ITEM_HEIGHT * SCALE;
 
 const CYLINDER_RADIUS = 100;
@@ -39,18 +39,10 @@ export const Picker = () => {
   );
 
   return (
-    <View style={{ height: PICKER_HEIGHT, backgroundColor: '#fff3', position: 'relative' }}>
-      <View
-        style={{
-          top: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
-          position: 'absolute',
-          height: ITEM_HEIGHT,
-          backgroundColor: '#f004',
-          left: 0,
-          right: 0,
-        }}
-      />
+    <View style={styles.container}>
+      <View style={styles.marker} />
       <Animated.FlatList
+        contentContainerStyle={styles.wheel}
         data={d}
         renderItem={renderItem}
         scrollEventThrottle={16}
@@ -64,8 +56,13 @@ export const Picker = () => {
 
 const PickerItemContainer = ({ item, idx, scrollY }: { item: number; idx: number; scrollY: SharedValue<number> }) => {
   const container = useAnimatedStyle(() => {
-    const activeItem = Math.floor(scrollY.value / ITEM_HEIGHT);
-    const fromCenter = activeItem + SCALE / 2 - idx;
+    // const fromCenter = scrollY.value / ITEM_HEIGHT + SCALE / 2 - idx;
+    // const t = interpolate(scrollY.value, [0, (2 * Math.PI * CYLINDER_RADIUS) / 8], [0, 360 / 8], {
+    //   extrapolateLeft: Extrapolate.EXTEND,
+    //   extrapolateRight: Extrapolate.IDENTITY,
+    // });
+
+    const fromCenter = Math.floor(scrollY.value / ITEM_HEIGHT) - idx;
 
     const getPerspective = (e: number) => {
       return CYLINDER_RADIUS * Math.cos(theta * e);
@@ -90,19 +87,41 @@ const PickerItemContainer = ({ item, idx, scrollY }: { item: number; idx: number
     };
   });
 
-  const styles = StyleSheet.create({
-    common: {
-      paddingHorizontal: 10,
-      borderRadius: 4,
-      backgroundColor: '#f00',
-      //
-    },
-  });
   return (
-    <View style={{ alignItems: 'center', height: ITEM_HEIGHT, justifyContent: 'center' }}>
+    <View style={styles.itemContainer}>
       <Animated.View style={[styles.common, container]}>
         <Text>random number {item}</Text>
       </Animated.View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    height: PICKER_HEIGHT,
+    backgroundColor: '#fff3',
+    position: 'relative',
+  },
+  wheel: {
+    paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
+  },
+  marker: {
+    top: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
+    position: 'absolute',
+    height: ITEM_HEIGHT,
+    backgroundColor: '#f004',
+    left: 0,
+    right: 0,
+  },
+  common: {
+    borderRadius: 2,
+    paddingHorizontal: 8,
+    backgroundColor: '#f00',
+  },
+  itemContainer: {
+    height: ITEM_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+  },
+});
