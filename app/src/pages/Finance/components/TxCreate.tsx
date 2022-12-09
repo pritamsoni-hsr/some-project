@@ -246,6 +246,7 @@ const AmountInput = () => {
         name={'amount'}
         render={({ field, fieldState }) => (
           <Input
+            {...field}
             autoFocus
             enablesReturnKeyAutomatically
             caption={fieldState.error?.message}
@@ -253,7 +254,12 @@ const AmountInput = () => {
             maxLength={9}
             returnKeyType={'done'}
             status={fieldState.error ? 'danger' : 'info'}
-            style={{ minWidth: 140, borderWidth: 0, borderBottomWidth: 0.5, backgroundColor: '#0000' }}
+            style={{
+              minWidth: 60,
+              borderWidth: 0,
+              borderBottomWidth: 0.5,
+              backgroundColor: '#0000',
+            }}
             testID={'amountInput'}
             textStyle={{ fontSize: 20, marginHorizontal: 0 }}
             value={field.value}
