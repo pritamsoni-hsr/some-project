@@ -16,10 +16,10 @@ import { Text, View } from '@app/components';
 const ITEM_HEIGHT = 30;
 const SCALE = 5; // must be odd
 const PICKER_HEIGHT = ITEM_HEIGHT * SCALE;
-
-const CYLINDER_RADIUS = 100;
 const numberOfItems = 20;
 const theta = (2 * Math.PI) / numberOfItems;
+const CYLINDER_RADIUS = PICKER_HEIGHT / (2 * Math.sin(theta));
+
 
 const d = _.range(0, numberOfItems);
 
