@@ -113,9 +113,13 @@ def to_transaction(obj: models.Transaction) -> TransactionResponse:
     response_model=ListTransactionResponse,
     response_model_exclude_none=True,
 )
-async def get_transactions(wallet_id: str, cursor: Optional[str] = None, user: LazyUser = Depends(get_user)):
+async def get_transactions(wallet_id: str, cursor: str | None = None, user: LazyUser = Depends(get_user)):
+    queryset = models.Transaction.filter(user_id=user.id)
+    if wallet_id != "all":
+        queryset.filter(wallet_id=wallet_id)
+
     return ListTransactionResponse(
-        results=[to_transaction(obj) for obj in await models.Transaction.filter(wallet_id=wallet_id, user_id=user.id)],
+        results=[to_transaction(obj) for obj in await queryset],
     )
 
 
