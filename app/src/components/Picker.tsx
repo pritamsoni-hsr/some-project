@@ -1,29 +1,30 @@
 import { useCallback } from 'react';
-import { ListRenderItem, StyleSheet } from 'react-native';
+import { ListRenderItem, StyleSheet, View } from 'react-native';
 import Animated, {
-  Extrapolate,
   SharedValue,
-  interpolate,
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
 
-import _ from 'lodash';
-
-import { Text, View } from '@app/components';
+import { Text } from '@app/components';
+import { haptics } from '@app/utils';
 
 const ITEM_HEIGHT = 30;
 const SCALE = 5; // must be odd
 const PICKER_HEIGHT = ITEM_HEIGHT * SCALE;
-const numberOfItems = 20;
-const theta = (2 * Math.PI) / numberOfItems;
-const CYLINDER_RADIUS = PICKER_HEIGHT / (2 * Math.sin(theta));
+const CYLINDER_RADIUS = 90;
 
+type Props<T extends string | number> = {
+  data: T[];
+  // selected?: T;
+  onChange: (e: T) => void;
+  // renderItem?: (e: T, idx: number) => React.ReactElement;
+};
 
-const d = _.range(0, numberOfItems);
-
-export const Picker = () => {
+export const Picker = <T extends string | number>(props: Props<T>) => {
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
     onScroll(event) {
@@ -31,9 +32,27 @@ export const Picker = () => {
     },
   });
 
-  const renderItem: ListRenderItem<number> = useCallback(
+  useAnimatedReaction(
+    // trigger haptics when active item changes
+    () => {
+      return Math.floor(scrollY.value / ITEM_HEIGHT);
+    },
+    (result, prev) => {
+      if (props.data[result] !== undefined && result !== prev) {
+        runOnJS(props.onChange)(props.data[result]);
+        runOnJS(haptics)();
+      }
+    },
+    [],
+  );
+
+  const renderItem: ListRenderItem<T> = useCallback(
     ({ item, index }) => {
-      return <PickerItemContainer idx={index} item={item} scrollY={scrollY} />;
+      return (
+        <PickerItemContainer idx={index} scrollY={scrollY}>
+          <Text>{item}</Text>
+        </PickerItemContainer>
+      );
     },
     [scrollY],
   );
@@ -42,8 +61,10 @@ export const Picker = () => {
     <View style={styles.container}>
       <View style={styles.marker} />
       <Animated.FlatList
+        // TODO: add initial index support, is broken because of useAnimatedReaction
+        // initialScrollIndex={props.data.findIndex(e => e === props.selected)}
         contentContainerStyle={styles.wheel}
-        data={d}
+        data={props.data}
         renderItem={renderItem}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -54,74 +75,59 @@ export const Picker = () => {
   );
 };
 
-const PickerItemContainer = ({ item, idx, scrollY }: { item: number; idx: number; scrollY: SharedValue<number> }) => {
-  const container = useAnimatedStyle(() => {
-    // const fromCenter = scrollY.value / ITEM_HEIGHT + SCALE / 2 - idx;
-    // const t = interpolate(scrollY.value, [0, (2 * Math.PI * CYLINDER_RADIUS) / 8], [0, 360 / 8], {
-    //   extrapolateLeft: Extrapolate.EXTEND,
-    //   extrapolateRight: Extrapolate.IDENTITY,
-    // });
+const PickerItemContainer = ({
+  idx,
+  scrollY,
+  children,
+}: {
+  idx: number;
+  scrollY: SharedValue<number>;
+  children: React.ReactNode;
+}) => {
+  const pickerItemStyles = useAnimatedStyle(() => {
+    // credits @ionic-picker
+    const pickerRotateFactor = -0.46;
+    const selectedIndex = Math.floor(scrollY.value / ITEM_HEIGHT);
+    const y = selectedIndex > -1 ? -(selectedIndex * ITEM_HEIGHT) : 0;
 
-    const fromCenter = Math.floor(scrollY.value / ITEM_HEIGHT) - idx;
+    const optOffset = idx * ITEM_HEIGHT + y;
 
-    const getPerspective = (e: number) => {
-      return CYLINDER_RADIUS * Math.cos(theta * e);
-    };
+    const rotateX = optOffset * pickerRotateFactor;
 
-    const scale = interpolate(fromCenter, [-2, 0, 2], [0.8, 1, 0.8], Extrapolate.EXTEND);
-    const rotateX = interpolate(
-      fromCenter,
-      [-2, -1, 0, 1, 2],
-      [-2 * theta, -theta, 0, theta, 2 * theta],
-      Extrapolate.EXTEND,
-    );
-    const perspective = interpolate(
-      fromCenter,
-      [-2, -1, 0, 1, 2],
-      [getPerspective(2), getPerspective(1), 1, getPerspective(1), getPerspective(2)],
-      Extrapolate.CLAMP,
-    );
+    if (Math.abs(rotateX) <= 90) {
+      return {
+        transform: [{ perspective: CYLINDER_RADIUS }, { rotateX: `${rotateX}deg` }],
+      };
+    }
 
-    return {
-      transform: [{ scale }, { perspective }, { rotateX: `${rotateX}rad` }],
-    };
+    return { transform: [{ translateY: -9999 }] };
   });
 
-  return (
-    <View style={styles.itemContainer}>
-      <Animated.View style={[styles.common, container]}>
-        <Text>random number {item}</Text>
-      </Animated.View>
-    </View>
-  );
+  return <Animated.View style={[styles.itemContainer, pickerItemStyles]}>{children}</Animated.View>;
 };
 
 const styles = StyleSheet.create({
   container: {
     height: PICKER_HEIGHT,
-    backgroundColor: '#fff3',
     position: 'relative',
   },
   wheel: {
     paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
   },
   marker: {
-    top: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
     position: 'absolute',
     height: ITEM_HEIGHT,
-    backgroundColor: '#f004',
+    top: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
     left: 0,
     right: 0,
-  },
-  common: {
-    borderRadius: 2,
-    paddingHorizontal: 8,
-    backgroundColor: '#f00',
+    backgroundColor: '#f003',
+    borderRadius: 4,
   },
   itemContainer: {
+    paddingHorizontal: 8,
+    marginHorizontal: 20,
     height: ITEM_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomWidth: 1,
   },
 });
