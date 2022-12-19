@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from tortoise.contrib.fastapi import register_tortoise
 
+import svc.logger  # noqa
 from svc import auth, wallet, wallet_category
 from svc.config import config
 
@@ -15,7 +16,7 @@ def get_method_name(route: APIRoute):
 app = FastAPI(
     debug=config.DEBUG,
     generate_unique_id_function=get_method_name,
-    servers=[{"url": "http://localhost:8000", "description": "development server"}],
+    servers=[{"url": "http://192.168.0.197:8000", "description": "development server"}],
 )
 
 app.add_middleware(
